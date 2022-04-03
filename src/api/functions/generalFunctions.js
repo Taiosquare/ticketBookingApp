@@ -1,11 +1,10 @@
-require("dotenv").config();
-
-const { User } = require("../models/user"),
-  { Account } = require("../models/account"),
-  { Event } = require("../models/event"),
-  { Ticket } = require("../models/ticket"),
-  mailer = require("../../services/mailer"),
-  fetch = require("node-fetch");
+const { User } = require("../models/user");
+const { Account } = require("../models/account");
+const { Event } = require("../models/event");
+const { Ticket } = require("../models/ticket");
+const crypto = require("crypto");
+const mailer = require("../../services/mailer");
+const fetch = require("node-fetch");
 
 const environmentCheck = async (env) => {
   let address = "";
@@ -33,22 +32,26 @@ const returnValidationError = async (res, errors) => {
   });
 }
 
-const sendConfirmationMail = async (token, email, userType, sendType, name, baseURL) => {
-  let from = `Energy Direct energydirect@outlook.com`,
-    to = email,
-    subject = `${userType} Account Confirmation`,
-    html = `<p>Good Day ${name},</p> 
-              <p>Please click this <a href="${baseURL}/auth/${sendType}?verify=${token}">link</a>
-              to confirm your email.</p>`;
+const sendConfirmationMail = async (token, email, name, baseURL) => {
+    try {
+        const from = `TBA@outlook.com`,
+            to = email,
+            subject = "Email Confirmation",
+            html = `<p>Good Day ${name},</p> 
+              <p>Please click this <a href="${baseURL}/verify-email?verify-email=${token}">link</a>
+              to verify your email.</p>`;
 
-  const data = {
-    from: from,
-    to: to,
-    subject: subject,
-    html: html,
-  };
+        const data = {
+            from: from,
+            to: to,
+            subject: subject,
+            html: html,
+        };
 
-  await mailer.sendEmail(data);
+        await mailer.sendEmail(data);
+    } catch (error) {
+        return error;
+    } 
 }
 
 const hostSavePayment = async (event) => {
@@ -135,10 +138,36 @@ const createRecepientCode = async (name, accountNumber, bankName) => {
   return response2.data.recipient_code;
 }
 
-module.exports.environmentCheck = environmentCheck;
-module.exports.validationErrorCheck = validationErrorCheck;
-module.exports.returnValidationError = returnValidationError;
-module.exports.sendConfirmationMail = sendConfirmationMail;
-module.exports.hostSavePayment = hostSavePayment;
-module.exports.userSavePayment = userSavePayment;
-module.exports.createRecepientCode = createRecepientCode;
+const userExists = async (requestBody) => {
+    const { username, email, businessDetails } = requestBody;
+
+    const user = await User.findOne({
+        $or: [
+            { "username": username },
+            { "email": email },
+            { "name": businessDetails.name },
+            { "businessDetails.companyEmail": businessDetails.companyEmail },
+            { "businessDetails.credentials.registrationNumber": businessDetails.credentials.registrationNumber },
+        ]
+    });
+
+    return user;
+}
+
+const createToken = async () => {
+    return await crypto.randomBytes(16).toString("hex");
+}
+
+module.exports.GeneralFunctions = {
+    environmentCheck,
+    validationErrorCheck,
+    returnValidationError,
+    sendConfirmationMail,
+    hostSavePayment,
+    userSavePayment,
+    createRecepientCode,
+    userExists,
+    createToken
+}
+
+

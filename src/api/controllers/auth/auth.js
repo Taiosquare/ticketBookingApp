@@ -1,17 +1,102 @@
-const { Admin } = require("../models/admin"),
-  { Host } = require("../models/host"),
-  { User } = require("../models/user"),
-  ControllersFunctions = require("../functions/controllersFunctions"),
-  UsersAuthFunctions = require("../functions/usersAuthFunctions");
+const { User } = require("../../models/user");
+const { RouteResponse } = require("../../helpers/routeResponse");
+const { StandardResponse } = require("../../helpers/standardResponse");
+const { AuthManager } = require("../../managers/auth/authManager");
+const { Validations } = require("../../helpers/validations");
+const { startSession } = require("mongoose");
+const GeneralFunctions = require("../../functions/generalFunctions");
+const argon2 = require("argon2");
+
+
+exports.createAdmin = async (req, res) => {
+    res.setHeader('access-token', req.token);
+    const session = await startSession();
+
+    try {
+        if (!req.headers.baseurl) {
+            return RouteResponse.badRequest(
+                StandardResponse.errorMessage("Base URL not sent"), res
+            );
+        }
+      
+        const payloadValidation = await Validations.payloadValidation(req);
+
+        if (payloadValidation.status == false) {
+            return RouteResponse.validationError(payloadValidation, res);
+        }
+
+        const userVerification = await Validations.userVerification(req, "superAdmin");
+
+        if (userVerification.status == false) {
+            return RouteResponse.validationError(userVerification, res);
+        }
+
+        session.startTransaction();
+        const opts = { session, new: true };
+
+        const createAdmin = await AuthManager.createAdmin(session, opts, req.body, req.headers.baseurl);
+
+        if (createAdmin.status == false) {
+            throw createAdmin.error;
+        }  
+            
+        RouteResponse.OkMessage201(createAdmin, res);
+    } catch (error) {
+        console.log({ error });
+
+        await session.abortTransaction();
+        session.endSession();
+
+        RouteResponse.internalServerError(
+            StandardResponse.serverError("Admin could not be created, please try again."), res
+        );
+    }
+}
 
 exports.register = async (req, res) => {
-  if (req.body.type == "admin") {
-    UsersAuthFunctions.adminRegister(req, res);
-  } else if (req.body.type == "host") {
-    UsersAuthFunctions.hostRegister(req, res);
-  } else if (req.body.type == "user") {
-    UsersAuthFunctions.userRegister(req, res);
-  }
+    const session = await startSession();
+
+    try {
+        if (!req.headers.baseurl) {
+            return RouteResponse.badRequest(
+                StandardResponse.errorMessage("Base URL not sent"), res
+            );
+        }
+
+        const payloadValidation = await Validations.payloadValidation(req);
+
+        if (payloadValidation.status == false) {
+            return RouteResponse.validationError(payloadValidation, res);
+        }
+
+        const user = await GeneralFunctions.userExists(req.body);
+
+        if (user != null) {
+            return RouteResponse.badRequest(
+                StandardResponse.errorMessage("User already registered"), res
+            );
+        }
+
+        session.startTransaction();
+        const opts = { session, new: true };
+
+        const createUser = await AuthManager.createUser(session, opts, req.body, req.headers.baseurl)
+
+        if (createUser.status == false) {
+            throw createUser.error;
+        } 
+            
+        RouteResponse.OkMessage201(createUser, res);
+    } catch (error) {
+        console.log({ error });
+
+        await session.abortTransaction();
+        session.endSession();
+
+        RouteResponse.internalServerError(
+            StandardResponse.serverError("User could not be added, please try again."), res
+        );
+    }
 }
 
 exports.login = async (req, res) => {
