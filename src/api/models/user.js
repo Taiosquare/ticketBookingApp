@@ -75,6 +75,14 @@ const BusinessDetailsSchema = new Schema(
             unique: true
         },
 
+        email: {
+            type: String,
+            required: true,
+            trim: true,
+            unique: true,
+            lowercase: true,
+        },
+
         type: {
             type: String,
         },
@@ -88,7 +96,7 @@ const BusinessDetailsSchema = new Schema(
             type: String,
         },
 
-        phoneNumber: {
+        landline: {
             type: String,
             required: true
         },
@@ -144,21 +152,19 @@ const UserSchema = new Schema(
             trim: true,
             unique: true,
         },
-
-        name: {
-            first: {
-                type: String,
-                trim: true,
-                required: true
-            },
-
-            last: {
-                type: String,
-                trim: true,
-                required: true
-            },
+       
+        firstname: {
+            type: String,
+            trim: true,
+            required: true
         },
 
+        lastname: {
+            type: String,
+            trim: true,
+            required: true
+        },
+       
         email: {
             type: String,
             required: true,
@@ -172,25 +178,28 @@ const UserSchema = new Schema(
             required: true,
         },
 
+        position: {
+            type: String,
+            trim: true,
+        },
+
         profilePicture: {
             type: String,
         },
 
-        accountStatus: {
-            approved: {
-                type: Boolean,
-                default: false,
-            },
+        accountApproved: {
+            type: Boolean,
+            default: false,
+        },
 
-            suspended: {
-                type: Boolean,
-                default: false,
-            },  
+        accountSuspended: {
+            type: Boolean,
+            default: false,
+        },  
 
-            emailVerified: {
-                type: Boolean,
-                default: false,
-            }
+        emailVerified: {
+            type: Boolean,
+            default: false,
         },
 
         superAdmin: {

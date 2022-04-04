@@ -138,25 +138,11 @@ const createRecepientCode = async (name, accountNumber, bankName) => {
   return response2.data.recipient_code;
 }
 
-const userExists = async (requestBody) => {
-    const { username, email, businessDetails } = requestBody;
-
-    const user = await User.findOne({
-        $or: [
-            { "username": username },
-            { "email": email },
-            { "name": businessDetails.name },
-            { "businessDetails.companyEmail": businessDetails.companyEmail },
-            { "businessDetails.credentials.registrationNumber": businessDetails.credentials.registrationNumber },
-        ]
-    });
-
-    return user;
-}
-
 const createToken = async () => {
     return await crypto.randomBytes(16).toString("hex");
 }
+
+
 
 module.exports.GeneralFunctions = {
     environmentCheck,
@@ -166,7 +152,6 @@ module.exports.GeneralFunctions = {
     hostSavePayment,
     userSavePayment,
     createRecepientCode,
-    userExists,
     createToken
 }
 

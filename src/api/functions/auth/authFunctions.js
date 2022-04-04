@@ -1,6 +1,7 @@
 const config = require("../../../../config");
 const jwt = require("jsonwebtoken");
 const argon2 = require("argon2");
+const { User } = require("../../models/user");
 
 const generateAuthToken = function (id) {
     const
@@ -88,9 +89,36 @@ const hashPassword = async (password) => {
     return await argon2.hash(password);
 }
 
+const userExists = async (requestBody) => {
+    const { username, email, businessDetails } = requestBody;
+
+    const user = await User.findOne({
+        $or: [
+            { "username": username },
+            { "email": email },
+            { "name": businessDetails.name },
+            { "businessDetails.companyEmail": businessDetails.companyEmail },
+            { "businessDetails.credentials.registrationNumber": businessDetails.credentials.registrationNumber },
+        ]
+    });
+
+    return user;
+}
+
+const findUserByEmail = async (email) => {
+    return await User.findOne({ email: email });
+}
+
+const findUserByToken = async (token) => {
+    return await User.findOne({ resetToken: token });
+}
+
 module.exports.AuthFunctions = {
     decodeToken,
     generateAuthToken,
     generateRefreshToken,
-    hashPassword
+    hashPassword,
+    userExists,
+    findUserByEmail,
+    findUserByToken
 } 
