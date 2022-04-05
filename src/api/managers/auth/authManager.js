@@ -106,7 +106,7 @@ const createUser = async (session, opts, requestBody, baseurl) => {
     }
 }
 
-const login = (requestBody) => {
+const login = async (requestBody) => {
     try {
         const { email, password } = requestBody;
 

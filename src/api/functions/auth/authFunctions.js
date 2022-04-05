@@ -90,18 +90,29 @@ const hashPassword = async (password) => {
 }
 
 const userExists = async (requestBody) => {
-    const { username, email, businessDetails } = requestBody;
+    const { username, email, role, businessDetails } = requestBody;
 
-    const user = await User.findOne({
-        $or: [
-            { "username": username },
-            { "email": email },
-            { "name": businessDetails.name },
-            { "businessDetails.companyEmail": businessDetails.companyEmail },
-            { "businessDetails.credentials.registrationNumber": businessDetails.credentials.registrationNumber },
-        ]
-    });
+    let user = {};
 
+    if (role == "regularUser") {
+        user = await User.findOne({
+            $or: [
+                { "username": username },
+                { "email": email }
+            ]
+        });
+    } else {
+        user = await User.findOne({
+            $or: [
+                { "username": username },
+                { "email": email },
+                { "name": businessDetails.name },
+                { "businessDetails.companyEmail": businessDetails.companyEmail },
+                { "businessDetails.credentials.registrationNumber": businessDetails.credentials.registrationNumber },
+            ]
+        });
+    }
+        
     return user;
 }
 

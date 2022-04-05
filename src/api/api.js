@@ -8,10 +8,10 @@ const express = require("express"),
     userRouter = require("./routers/user/user");
 
 api.use("/auth", authRouter);
-api.use("/admin", adminRouter);
-api.use("/host", hostRouter);
-api.use("/system", systemRouter);
+// api.use("/admin", adminRouter);
+// api.use("/host", hostRouter);
+// api.use("/system", systemRouter);
 // api.use("/upload", uploadRouter);
-api.use("/user", userRouter);
+// api.use("/user", userRouter);
 
 module.exports = api;

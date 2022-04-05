@@ -1,10 +1,11 @@
 const { User } = require("../models/user");
-const { Account } = require("../models/account");
+const { Payment } = require("../models/payment");
 const { Event } = require("../models/event");
 const { Ticket } = require("../models/ticket");
 const crypto = require("crypto");
 const mailer = require("../../services/mailer");
 const fetch = require("node-fetch");
+
 
 const environmentCheck = async (env) => {
   let address = "";
@@ -57,7 +58,7 @@ const sendConfirmationMail = async (token, email, name, baseURL) => {
 const hostSavePayment = async (event) => {
   let event2 = await Event.find({ transferCode: event.data.transfer_code });
 
-  await Account.updateOne(
+  await Payment.updateOne(
     { host: event2.host },
     {
       $push: {
@@ -98,7 +99,7 @@ const userSavePayment = async (event) => {
   );
 }
 
-const createRecepientCode = async (name, accountNumber, bankName) => {
+const createRecepientCode = async (name, PaymentNumber, bankName) => {
   let banks = await fetch('https://api.paystack.co/bank', {
     method: 'GET',
     headers: {
@@ -119,7 +120,7 @@ const createRecepientCode = async (name, accountNumber, bankName) => {
     type: "nuban",
     name: name,
     description: `${name}'s recepient code creation`,
-    account_number: accountNumber,
+    Payment_number: PaymentNumber,
     bank_code: code,
     currency: "NGN"
   }

@@ -1,12 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const authController = require("../controllers/auth");
+const { User } = require("../../models/user");
+const authController = require("../../controllers/auth/auth");
 const { check, param } = require("express-validator");
 const passportFacebook = require('../../authentication/facebook');
 const authenticate = require("../../authentication/isAuth");
 
 router
-    .route("/cAdmin")
+    .route("/createAdmin")
     .post(
         authenticate,
         [
@@ -45,7 +46,7 @@ router
                 .isLength({ min: 8 }).withMessage("Password must have at least 8 characters").bail()
                 .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/).withMessage("Password must have at least 1 uppercase, 1 lowercase letter and 1 number"),
         ],
-        authController.registerAdmin
+        authController.createAdmin
     );
 
 router
@@ -72,28 +73,28 @@ router
                         throw new Error("E-Mail Address already registered");
                     }
                 }),
-            check("role")
-                .notEmpty().withMessage("Role cannot be empty").bail()
-                .isString().withMessage("Role should be a String"),
-            check("password")
+             check("password")
                 .notEmpty().withMessage("Password cannot be empty").bail()
                 .isLength({ min: 8 }).withMessage("Password must have at least 8 characters").bail()
                 .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/).withMessage("Password must have at least 1 uppercase, 1 lowercase letter and 1 number"),
-            check("position")
-                .notEmpty().withMessage("Position cannot be empty").bail()
-                .isString().withMessage("Position should be a String"),
-            check("businessDetails.name")
-                .notEmpty().withMessage("Company Name cannot be empty").bail()
-                .isString().withMessage("Company Name should be a String"),
-            check("businessDetails.address")
-                .notEmpty().withMessage("Company Address cannot be empty").bail()
-                .isString().withMessage("Company Address should be a String"),
-            check("businessDetails.landline")
-                .notEmpty().withMessage("Business Landline cannot be empty").bail()
-                .isString().withMessage("Business Landline should be a String"),
-            check("businessDetails.email")
-                .notEmpty().withMessage("Company Email cannot be empty").bail()
-                .isEmail().withMessage("Company Email is invalid"),
+            check("role")
+                .notEmpty().withMessage("Role cannot be empty").bail()
+                .isString().withMessage("Role should be a String")
+            // check("position")
+            //     .notEmpty().withMessage("Position cannot be empty").bail()
+            //     .isString().withMessage("Position should be a String"),
+            // check("businessDetails.name")
+            //     .notEmpty().withMessage("Company Name cannot be empty").bail()
+            //     .isString().withMessage("Company Name should be a String"),
+            // check("businessDetails.address")
+            //     .notEmpty().withMessage("Company Address cannot be empty").bail()
+            //     .isString().withMessage("Company Address should be a String"),
+            // check("businessDetails.landline")
+            //     .notEmpty().withMessage("Business Landline cannot be empty").bail()
+            //     .isString().withMessage("Business Landline should be a String"),
+            // check("businessDetails.email")
+            //     .notEmpty().withMessage("Company Email cannot be empty").bail()
+            //     .isEmail().withMessage("Company Email is invalid"),
         ],
         authController.register
     );
