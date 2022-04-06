@@ -106,9 +106,8 @@ const userExists = async (requestBody) => {
             $or: [
                 { "username": username },
                 { "email": email },
-                { "name": businessDetails.name },
-                { "businessDetails.companyEmail": businessDetails.companyEmail },
-                { "businessDetails.credentials.registrationNumber": businessDetails.credentials.registrationNumber },
+                { "businessDetails.name": businessDetails.name },
+                { "businessDetails.email": businessDetails.email },
             ]
         });
     }

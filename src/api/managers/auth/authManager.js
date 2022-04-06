@@ -2,7 +2,9 @@ const { User } = require("../../models/user");
 const { GeneralFunctions } = require("../../functions/generalFunctions");
 const { AuthFunctions } = require("../../functions/auth/authFunctions");
 const { StandardResponse } = require("../../helpers/standardResponse");
+const mailer = require("../../../services/mailer");
 const mongoose = require("mongoose");
+const argon2 = require("argon2");
 
 const createAdmin = async (session, opts, requestBody, baseurl) => {
     try {
@@ -136,8 +138,8 @@ const login = async (requestBody) => {
                     role: user.role,
                     businessName: user.businessDetails ? user.businessDetails.name : null,
                     businessEmail: user.businessDetails ? user.businessDetails.email : null,
-                    emailVerified: user.accountStatus.emailVerified,
-                    accountApproved: user.accountStatus.approved,
+                    emailVerified: user.emailVerified,
+                    accountApproved: user.accountApproved,
                     profilePicture: user.profilePicture ? user.profilePicture : null
                 },
                 tokens: {
@@ -311,7 +313,10 @@ const resendVerificationMail = async (session, opts, userId, baseurl) => {
         session.endSession();
 
         return StandardResponse.successMessage(
-            "E-Mail Confirmation Link Successfully resent"
+            "E-Mail Verification Link Successfully resent",
+            {
+                verificationToken: token,
+            }
         );
     } catch (error) {
         return StandardResponse.serverError(error);

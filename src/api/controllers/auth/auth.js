@@ -115,7 +115,7 @@ exports.login = async (req, res) => {
                 throw login.error;
             }
             
-            return RouteResponse.badRequest(loginUser, res);
+            return RouteResponse.badRequest(login, res);
         }  
 
         RouteResponse.OkMessage(login, res);
@@ -181,7 +181,7 @@ exports.sendResetPasswordLink = async (req, res) => {
             return RouteResponse.validationError(payloadValidation, res);
         }
 
-        const user = await GeneralFunctions.findUserByEmail(req.body.email);
+        const user = await AuthFunctions.findUserByEmail(req.body.email);
     
         if (user == null) {
             return RouteResponse.badRequest(
@@ -219,7 +219,7 @@ exports.verifyPasswordToken = async (req, res) => {
             return RouteResponse.validationError(payloadValidation, res);
         }
 
-        const user = await GeneralFunctions.findUserByToken(req.params.token);
+        const user = await AuthFunctions.findUserByToken(req.params.token);
 
         if (user == null) {
             return RouteResponse.badRequest(
@@ -282,7 +282,7 @@ exports.resetPassword = async (req, res) => {
     }
 };
 
-exports.verifyMail = async (req, res) => {
+exports.verifyeMailAddress = async (req, res) => {
     const session = await startSession();
 
     try {
@@ -314,7 +314,7 @@ exports.verifyMail = async (req, res) => {
     }
 };
 
-exports.resendVerificationMail = async (req, res) => {
+exports.resendeMailVerificationLink = async (req, res) => {
     res.setHeader('access-token', req.token);
     const session = await startSession();
 

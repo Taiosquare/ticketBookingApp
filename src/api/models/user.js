@@ -72,14 +72,12 @@ const BusinessDetailsSchema = new Schema(
         name: {
             type: String,
             required: true,
-            unique: true
         },
 
         email: {
             type: String,
             required: true,
             trim: true,
-            unique: true,
             lowercase: true,
         },
 

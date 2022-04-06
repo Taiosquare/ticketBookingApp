@@ -79,22 +79,27 @@ router
                 .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/).withMessage("Password must have at least 1 uppercase, 1 lowercase letter and 1 number"),
             check("role")
                 .notEmpty().withMessage("Role cannot be empty").bail()
-                .isString().withMessage("Role should be a String")
-            // check("position")
-            //     .notEmpty().withMessage("Position cannot be empty").bail()
-            //     .isString().withMessage("Position should be a String"),
-            // check("businessDetails.name")
-            //     .notEmpty().withMessage("Company Name cannot be empty").bail()
-            //     .isString().withMessage("Company Name should be a String"),
-            // check("businessDetails.address")
-            //     .notEmpty().withMessage("Company Address cannot be empty").bail()
-            //     .isString().withMessage("Company Address should be a String"),
-            // check("businessDetails.landline")
-            //     .notEmpty().withMessage("Business Landline cannot be empty").bail()
-            //     .isString().withMessage("Business Landline should be a String"),
-            // check("businessDetails.email")
-            //     .notEmpty().withMessage("Company Email cannot be empty").bail()
-            //     .isEmail().withMessage("Company Email is invalid"),
+                .isString().withMessage("Role should be a String"),
+            check("position")
+                .optional()
+                .notEmpty().withMessage("Position cannot be empty").bail()
+                .isString().withMessage("Position should be a String"),
+            check("businessDetails.name")
+                .optional()
+                .notEmpty().withMessage("Company Name cannot be empty").bail()
+                .isString().withMessage("Company Name should be a String"),
+            check("businessDetails.address")
+                .optional()
+                .notEmpty().withMessage("Company Address cannot be empty").bail()
+                .isString().withMessage("Company Address should be a String"),
+            check("businessDetails.landline")
+                .optional()
+                .notEmpty().withMessage("Business Landline cannot be empty").bail()
+                .isString().withMessage("Business Landline should be a String"),
+            check("businessDetails.email")
+                .optional()
+                .notEmpty().withMessage("Company Email cannot be empty").bail()
+                .isEmail().withMessage("Company Email is invalid"),
         ],
         authController.register
     );
@@ -161,21 +166,21 @@ router
     );
 
 router
-    .route("/verifyMail/:token")
+    .route("/verifyeMailAddress/:token")
     .patch(
         [
             param("token")
                 .isLength({ min: 32, max: 32 }).withMessage("Token should be 32 characters long").bail()
                 .isString().withMessage("Token should be a String"),
         ],
-        authController.verifyMail
+        authController.verifyeMailAddress
     );
 
 router
-    .route("/resendVerificationMail")
+    .route("/resendeMailVerificationLink")
     .post(
         authenticate,
-        authController.resendVerificationMail
+        authController.resendeMailVerificationLink
     );
 
 router
