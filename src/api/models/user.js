@@ -108,6 +108,7 @@ const BusinessDetailsSchema = new Schema(
             type: String,
         },
 
+        // Store only the 10 most recent events
         events: [
             {
                 type: Schema.Types.ObjectId,

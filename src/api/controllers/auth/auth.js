@@ -4,7 +4,6 @@ const { StandardResponse } = require("../../helpers/standardResponse");
 const { AuthManager } = require("../../managers/auth/authManager");
 const { Validations } = require("../../helpers/validations");
 const { startSession } = require("mongoose");
-const { GeneralFunctions } = require("../../functions/generalFunctions");
 const { AuthFunctions } = require("../../functions/auth/authFunctions");
 const argon2 = require("argon2");
 

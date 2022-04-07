@@ -1,279 +1,354 @@
-// const { Admin } = require("../../../models/user"),
-//   { Host } = require("../models/host"),
-//   { User } = require("../models/user"),
-//   mailer = require("../../services/mailer"),
-//   GeneralFunctions = require("../functions/generalFunctions"),
-//   { validationResult } = require("express-validator");
+const { User } = require("../../../models/user");
+const { AdminManager } = require("../../../managers/user/admin/adminManager");
+const { GeneralFunctions } = require("../functions/generalFunctions");
+const mailer = require("../../services/mailer");
 
-// exports.approveHost = async (req, res) => {
-//   try {
-//     res.setHeader('access-token', req.token);
-//     const errors = validationResult(req);
+exports.approveHost = async (req, res) => {
+    res.setHeader('access-token', req.token);
+    const session = await startSession();
 
-//     if (!errors.isEmpty()) {
-//       return res.status(400).json({
-//         errors: await GeneralFunctions.validationErrorCheck(errors)
-//       });
-//     }
+    try {
+        const payloadValidation = await Validations.payloadValidation(req);
 
-//     const id = req.params.hostId,
-//       host = await Host.findById(id),
-//       admin = await Admin.findById(req.user._id);
+        if (payloadValidation.status == false) {
+            return RouteResponse.validationError(payloadValidation, res);
+        }
 
-//     let address = "";
+        if ((req.user.role != "admin") && (req.user.role != "superAdmin")) {
+            return RouteResponse.validationError(
+                StandardResponse.validationError("Invalid User Role"), res
+            );
+        } 
 
-//     host.isApproved = true;
-//     admin.approvedHosts.push(host._id);
+        session.startTransaction();
+        const opts = { session, new: true };
 
-//     await user.save();
-//     await admin.save();
+        const approveHost = await adminManager.approveHost(session, opts, req.params.hostId, req.user._id)
+    
+        if (approveHost.status == false) {
+            throw approveHost.error;
+        } 
+            
+        RouteResponse.OkMessage(approveHost, res);
+    } catch (error) {
+        console.log({ error });
 
-//     address = GeneralFunctions.environmentCheck(process.env.NODE_ENV);
+        await session.abortTransaction();
+        session.endSession();
 
-//     let from = `TBA tba@outlook.com`,
-//       to = host.email,
-//       subject = "Account Approval Notice",
-//       html = `<p>Good Day ${user.companyName}</p> 
-//               <p>We wish to announce to you that your account has been approved
-//               after the review of your credentials from our end, thank you.</p>`;
+        RouteResponse.internalServerError(
+            StandardResponse.serverError("Host Approval Failed, please try again."), res
+        );
+    }
+}
 
-//     const data = {
-//       from: from,
-//       to: to,
-//       subject: subject,
-//       html: html,
-//     };
+exports.suspendHost = async (req, res) => {
+    res.setHeader('access-token', req.token);
+    const session = await startSession();
+    
+    try {
+        const payloadValidation = await Validations.payloadValidation(req);
 
-//     await mailer.sendEmail(data);
+        if (payloadValidation.status == false) {
+            return RouteResponse.validationError(payloadValidation, res);
+        }
 
-//     res.status(200).json({
-//       message: "Host Approved Successfully.",
-//       host: {
-//         _id: host._id,
-//         name: host.brandName,
-//         email: host.brandEmail,
-//       },
-//     });
-//   } catch (error) {
-//     res.status(400)
-//       .json({ error: "Error: Host Approval Failed, please try again." });
-//   }
-// }
+        if ((req.user.role != "admin") && (req.user.role != "superAdmin")) {
+            return RouteResponse.validationError(
+                StandardResponse.validationError("Invalid User Role"), res
+            );
+        } 
 
-// exports.suspendHost = async (req, res) => {
-//   try {
-//     res.setHeader('access-token', req.token);
-//     const errors = validationResult(req);
+        session.startTransaction();
+        const opts = { session, new: true };
 
-//     if (!errors.isEmpty()) {
-//       return res.status(400).json({
-//         errors: await GeneralFunctions.validationErrorCheck(errors)
-//       });
-//     }
+        const { hostId } = req.params;
+        
+        await User.updateOne([
+            {
+                _id: hostId
+            },
+            {
+                $set: {
+                    accountSuspended: true
+                }
+            }
+        ], opts);
+        
+        await session.commitTransaction();
+        session.endSession();
 
-//     if (req.user.superAdmin == false) {
-//       return res.status(400).json({
-//         error: "Only Super Admins can Suspend Administrators",
-//       });
-//     }
+        RouteResponse.OkMessage(
+            StandardResponse.successMessage("Host Suspended Successfully."), res
+        );
+    } catch (error) {
+        console.log({ error });
 
-//     const id = req.params.hostId,
-//       host = await Host.findById(id);
+        await session.abortTransaction();
+        session.endSession();
 
-//     host.accountSuspended = true;
+        RouteResponse.internalServerError(
+            StandardResponse.serverError("Host Suspension Failed, please try again."), res
+        );
+    }
+}
 
-//     await host.save();
+exports.getUser = async (req, res) => {
+    res.setHeader('access-token', req.token);
 
-//     res.status(200).json({
-//       message: "Host Suspended Successfully."
-//     });
-//   } catch (error) {
-//     res.status(400).json({
-//       error: "Error: Host Suspension Failed, please try again."
-//     });
-//   }
-// }
+    try {
+        const payloadValidation = await Validations.payloadValidation(req);
 
-// exports.getUser = async (req, res) => {
-//   try {
-//     res.setHeader('access-token', req.token);
-//     const errors = validationResult(req);
+        if (payloadValidation.status == false) {
+            return RouteResponse.validationError(payloadValidation, res);
+        }
 
-//     if (!errors.isEmpty()) {
-//       return res.status(400).json({
-//         errors: await GeneralFunctions.validationErrorCheck(errors)
-//       });
-//     }
+        if ((req.user.role != "admin") && (req.user.role != "superAdmin")) {
+            return RouteResponse.validationError(
+                StandardResponse.validationError("Invalid User Role"), res
+            );
+        } 
 
-//     const id = req.params.userId;
-//     let user = {};
+        const { userId } = req.params;
+    
+        const user = await User.findById(userId)
+            .select('-password -token -__v')
+            .populate("bookedEvents.id", "title category location.address dates")
+            .populate("ratedEvents.id", "title category location.address  rating.averageScore");
 
-//     user = await User.findById(id).select('-password -token -__v')
-//       .populate("bookedEvents.id", "title category location.address dates")
-//       .populate("ratedEvents.id", "title category location.address  rating.averageScore");
+        RouteResponse.OkMessage(
+            StandardResponse.successMessage(null, { user: user }), res
+        );
+    } catch (error) {
+        console.log({ error });
 
-//     res.status(200).json({ user: user });
-//   } catch (error) {
-//     res.status(404).json({ error: "User not Found." });
-//   }
-// }
+        RouteResponse.internalServerError(
+            StandardResponse.serverError("User not Found."), res
+        );
+    }
+}
 
-// exports.getUsers = async (req, res) => {
-//   try {
-//     res.setHeader('access-token', req.token);
+exports.getUsers = async (req, res) => {
+    res.setHeader('access-token', req.token);
 
-//     let users = await User.find().select(
-//       "username firstname lastname email createdAt updatedAt"
-//     );
+    try {
+        if ((req.user.role != "admin") && (req.user.role != "superAdmin")) {
+            return RouteResponse.validationError(
+                StandardResponse.validationError("Invalid User Role"), res
+            );
+        } 
 
-//     res.status(200).json({ users: users });
-//   } catch (error) {
-//     res.status(404).json({ error: "Users not Found." });
-//   }
-// }
+        const users = await User.find()
+            .select("username firstname lastname email createdAt updatedAt");
 
-// // exports.getTickets = async (req, res) => {
-// // }
+        RouteResponse.OkMessage(
+            StandardResponse.successMessage(null, { users: users }), res
+        );
+    } catch (error) {
+        console.log({ error });
 
-// exports.getHost = async (req, res) => {
-//   try {
-//     res.setHeader('access-token', req.token);
-//     const errors = validationResult(req);
+        RouteResponse.internalServerError(
+            StandardResponse.serverError("Users not Found."), res
+        );
+    }
+}
 
-//     if (!errors.isEmpty()) {
-//       return res.status(400).json({
-//         errors: await GeneralFunctions.validationErrorCheck(errors)
-//       });
-//     }
+exports.getHost = async (req, res) => {
+    res.setHeader('access-token', req.token);
 
-//     const id = req.params.hostId;
-//     let user = {};
+    try {
+        const payloadValidation = await Validations.payloadValidation(req);
 
-//     host = await Host.findById(id).select('-password -token -__v')
-//       .populate("events", "title category location.address dates");
+        if (payloadValidation.status == false) {
+            return RouteResponse.validationError(payloadValidation, res);
+        }
 
-//     res.status(200).json({ host: host });
-//   } catch (error) {
-//     res.status(404).json({ error: "Host not Found." });
-//   }
-// }
+        if ((req.user.role != "admin") && (req.user.role != "superAdmin")) {
+            return RouteResponse.validationError(
+                StandardResponse.validationError("Invalid User Role"), res
+            );
+        } 
 
-// exports.getHosts = async (req, res) => {
-//   try {
-//     res.setHeader('access-token', req.token);
+        const { hostId } = req.params;
+    
+        const host = await User.findById(hostId)
+            .select('-password -token -__v')
+            .populate("businessDetails.events", "title category location.address dates");
 
-//     let hosts = await Host.find().select(
-//       "brandName brandType brandEmail createdAt updatedAt"
-//     );
+        RouteResponse.OkMessage(
+            StandardResponse.successMessage(null, { host: host }), res
+        );
+    } catch (error) {
+        console.log({ error });
 
-//     res.status(200).json({ hostss: hosts });
-//   } catch (error) {
-//     res.status(404).json({ error: "Hosts not Found." });
-//   }
-// }
+        RouteResponse.internalServerError(
+            StandardResponse.serverError("Host not Found."), res
+        );
+    }
+}
 
-// exports.getEvents = async (req, res) => {
-//   try {
-//     res.setHeader('access-token', req.token);
+exports.getHosts = async (req, res) => {
+    res.setHeader('access-token', req.token);
 
-//     if (!errors.isEmpty()) {
-//       return res.status(400).json({
-//         errors: await GeneralFunctions.validationErrorCheck(errors)
-//       });
-//     }
+    try {
+        if ((req.user.role != "admin") && (req.user.role != "superAdmin")) {
+            return RouteResponse.validationError(
+                StandardResponse.validationError("Invalid User Role"), res
+            );
+        } 
 
-//     const ITEMS_PER_PAGE = 20,
-//       page = +req.query.page || 1,
-//       totalEvents = await Event.find().countDocuments();
+        const hosts = await Host.find()
+            .select("businessDetails.name businessDetails.type businessDetails.email createdAt updatedAt");
 
-//     let events = await Event.find()
-//       .skip((page - 1) * ITEMS_PER_PAGE)
-//       .limit(ITEMS_PER_PAGE);
+        RouteResponse.OkMessage(
+            StandardResponse.successMessage(null, { hosts: hosts }), res
+        );
+    } catch (error) {
+        console.log({ error });
 
-//     res.status(200).json({
-//       events: events,
-//       currentPage: page,
-//       hasNextPage: ITEMS_PER_PAGE * page < totalEvents,
-//       hasPreviousPage: page > 1,
-//       nextPage: page + 1,
-//       previousPage: page - 1,
-//       lastPage: Math.ceil(totalEvents / ITEMS_PER_PAGE),
-//     });
-//   } catch (error) {
-//     res.status(404).json({ error: "Events not found." });
-//   }
-// }
+        RouteResponse.internalServerError(
+            StandardResponse.serverError("Hosts not Found."), res
+        );
+    }
+}
 
-// exports.getAdministrator = async (req, res) => {
-//   try {
-//     res.setHeader('access-token', req.token);
-//     const errors = validationResult(req);
+exports.getEvents = async (req, res) => {
+    res.setHeader('access-token', req.token);
 
-//     if (!errors.isEmpty()) {
-//       return res.status(400).json({
-//         errors: await GeneralFunctions.validationErrorCheck(errors)
-//       });
-//     }
+    try {
+        const payloadValidation = await Validations.payloadValidation(req);
 
-//     const id = req.params.adminId;
+        if (payloadValidation.status == false) {
+            return RouteResponse.validationError(payloadValidation, res);
+        }
 
-//     const admin = await Admin.findById(id)
-//       .select('-password -__v -token')
-//       .populate("approvedHosts", "brandName brandType brandEmail");
+        if ((req.user.role != "admin") && (req.user.role != "superAdmin")) {
+            return RouteResponse.validationError(
+                StandardResponse.validationError("Invalid User Role"), res
+            );
+        } 
 
-//     res.status(200).json({ admin: admin });
-//   } catch (error) {
-//     res.status(404).json({ error: "Error: Admin Details could not be retrieved." });
-//   }
-// }
+        const getEvents = await adminManager.getEvents(req.query.page);
+    
+        if (getEvents.status == false) {
+            throw getEvents.error;
+        } 
+            
+        RouteResponse.OkMessage(getEvents, res);
+    } catch (error) {
+        console.log({ error });
 
-// exports.getAdministrators = async (req, res) => {
-//   try {
-//     res.setHeader('access-token', req.token);
+        RouteResponse.internalServerError(
+            StandardResponse.serverError("Events not Found."), res
+        );
+    }
+}
 
-//     const admins = await Admin.find().select(
-//       "username firstname lastname email createdAt updatedAt"
-//     );
+exports.getAdministrator = async (req, res) => {
+    res.setHeader('access-token', req.token);
 
-//     res.status(200).json({ admins: admins });
-//   } catch (error) {
-//     res.status(404).json({ error: "Error: Admins not Found." });
-//   }
-// }
+    try {
+        const payloadValidation = await Validations.payloadValidation(req);
 
-// exports.suspendAdministrator = async (req, res) => {
-//   try {
-//     res.setHeader('access-token', req.token);
-//     const errors = validationResult(req);
+        if (payloadValidation.status == false) {
+            return RouteResponse.validationError(payloadValidation, res);
+        }
 
-//     if (!errors.isEmpty()) {
-//       return res.status(400).json({
-//         errors: await GeneralFunctions.validationErrorCheck(errors)
-//       });
-//     }
+        const userVerification = await Validations.userVerification(req, "superAdmin");
 
-//     if (req.admin.superAdmin == false) {
-//       return res.status(400).json({
-//         error: "Only Super Admins can Suspend Administrators",
-//       });
-//     }
+        if (userVerification.status == false) {
+            return RouteResponse.validationError(userVerification, res);
+        }
 
-//     const id = req.params.adminId,
-//       admin = await Admin.findById(id);
+        const { adminId } = req.params;
 
-//     admin.accountSuspended = true;
+        const admin = await User.findById(adminId)
+            .select('-password -__v -token');
 
-//     await admin.save();
+        RouteResponse.OkMessage(
+            StandardResponse.successMessage(null, { admin: admin }), res
+        );
+    } catch (error) {
+        console.log({ error });
 
-//     // This might be a mail instead
+        RouteResponse.internalServerError(
+            StandardResponse.serverError("Admin Details could not be retrieved."), res
+        );
+    }
+}
 
-//     res.status(200).json({
-//       message: "Admin Suspended Successfully.",
-//       //admin: admin
-//     });
-//   } catch (error) {
-//     res
-//       .status(400)
-//       .json({ error: "Error: Admin Suspension Failed, please try again." });
-//   }
-// }
+exports.getAdministrators = async (req, res) => {
+    res.setHeader('access-token', req.token);
+
+    try {
+        const userVerification = await Validations.userVerification(req, "superAdmin");
+
+        if (userVerification.status == false) {
+            return RouteResponse.validationError(userVerification, res);
+        }
+
+        const admins = await Admin.find()
+            .select("username firstname lastname email createdAt updatedAt");
+
+        RouteResponse.OkMessage(
+            StandardResponse.successMessage(null, { admins: admins }), res
+        );
+    } catch (error) {
+        console.log({ error });
+
+        RouteResponse.internalServerError(
+            StandardResponse.serverError("Admins not Found."), res
+        );
+    }
+}
+
+exports.suspendAdministrator = async (req, res) => {
+    res.setHeader('access-token', req.token);
+    const session = await startSession();
+
+    try {
+        const payloadValidation = await Validations.payloadValidation(req);
+
+        if (payloadValidation.status == false) {
+            return RouteResponse.validationError(payloadValidation, res);
+        }
+
+        const userVerification = await Validations.userVerification(req, "superAdmin");
+
+        if (userVerification.status == false) {
+            return RouteResponse.validationError(userVerification, res);
+        }
+
+        session.startTransaction();
+        const opts = { session, new: true };
+
+        const { adminId } = req.params;
+
+        await User.updateOne([
+            {
+                _id: adminId
+            },
+            {
+                $set: {
+                    accountSuspended: true
+                }
+            }
+        ], opts);
+
+        await session.commitTransaction();
+        session.endSession();
+
+        RouteResponse.OkMessage(
+            StandardResponse.successMessage("Admin Suspended Successfully."), res
+        );
+    } catch (error) {
+        console.log({ error });
+
+        await session.abortTransaction();
+        session.endSession();
+
+        RouteResponse.internalServerError(
+            StandardResponse.serverError("Admin Suspension Failed, please try again."), res
+        );
+    }
+}
