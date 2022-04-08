@@ -1,7 +1,9 @@
 const { User } = require("../../../models/user");
 const { AdminManager } = require("../../../managers/user/admin/adminManager");
-const { GeneralFunctions } = require("../functions/generalFunctions");
-const mailer = require("../../services/mailer");
+const { RouteResponse } = require("../../../helpers/routeResponse");
+const { StandardResponse } = require("../../../helpers/standardResponse");
+const { Validations } = require("../../../helpers/validations");
+const { startSession } = require("mongoose");
 
 exports.approveHost = async (req, res) => {
     res.setHeader('access-token', req.token);
@@ -23,7 +25,7 @@ exports.approveHost = async (req, res) => {
         session.startTransaction();
         const opts = { session, new: true };
 
-        const approveHost = await adminManager.approveHost(session, opts, req.params.hostId, req.user._id)
+        const approveHost = await AdminManager.approveHost(session, opts, req.params.hostId);
     
         if (approveHost.status == false) {
             throw approveHost.error;
@@ -64,16 +66,19 @@ exports.suspendHost = async (req, res) => {
 
         const { hostId } = req.params;
         
-        await User.updateOne([
+        await User.updateOne(
             {
                 _id: hostId
             },
-            {
-                $set: {
-                    accountSuspended: true
+            [
+                {
+                    $set: {
+                        accountSuspended: true
+                    }
                 }
-            }
-        ], opts);
+            ],
+            opts
+        );
         
         await session.commitTransaction();
         session.endSession();
@@ -138,7 +143,7 @@ exports.getUsers = async (req, res) => {
             );
         } 
 
-        const users = await User.find()
+        const users = await User.find({ role: "regularUser" })
             .select("username firstname lastname email createdAt updatedAt");
 
         RouteResponse.OkMessage(
@@ -197,7 +202,7 @@ exports.getHosts = async (req, res) => {
             );
         } 
 
-        const hosts = await Host.find()
+        const hosts = await User.find({ role: "host" })
             .select("businessDetails.name businessDetails.type businessDetails.email createdAt updatedAt");
 
         RouteResponse.OkMessage(
@@ -228,7 +233,7 @@ exports.getEvents = async (req, res) => {
             );
         } 
 
-        const getEvents = await adminManager.getEvents(req.query.page);
+        const getEvents = await AdminManager.getEvents(req.query.page);
     
         if (getEvents.status == false) {
             throw getEvents.error;
@@ -287,7 +292,7 @@ exports.getAdministrators = async (req, res) => {
             return RouteResponse.validationError(userVerification, res);
         }
 
-        const admins = await Admin.find()
+        const admins = await User.find({ role: "admin" })
             .select("username firstname lastname email createdAt updatedAt");
 
         RouteResponse.OkMessage(
@@ -324,16 +329,19 @@ exports.suspendAdministrator = async (req, res) => {
 
         const { adminId } = req.params;
 
-        await User.updateOne([
+        await User.updateOne(
             {
                 _id: adminId
             },
-            {
-                $set: {
-                    accountSuspended: true
+            [
+                {
+                    $set: {
+                        accountSuspended: true
+                    }
                 }
-            }
-        ], opts);
+            ],
+            opts
+        );
 
         await session.commitTransaction();
         session.endSession();

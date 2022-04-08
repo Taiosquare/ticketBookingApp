@@ -1,19 +1,25 @@
 const { User } = require("../../../models/user");
+const { Event } = require("../../../models/event");
+const { StandardResponse } = require("../../../helpers/standardResponse");
+const mailer = require("../../../../services/mailer");
 
-const approveHost = async (session, opts, hostId, userId) => {
+const approveHost = async (session, opts, hostId) => {
     try {
-        await User.updateOne([
+        const res = await User.updateOne(
             {
                 _id: hostId
             },
-            {
-                $set: {
-                    isApproved: true
+            [
+                {
+                    $set: {
+                        accountApproved: true
+                    }
                 }
-            }
-        ], opts);
+            ],
+            opts
+        );
 
-        const host = await User.findById(hostId); // check if the id can be gotten from the update operation
+        const host = await User.findById(hostId);
 
         const from = `TBA tba@outlook.com`,
             to = host.email,
@@ -49,7 +55,7 @@ const approveHost = async (session, opts, hostId, userId) => {
     }
 }
 
-const getEvents = (queryPage) => {
+const getEvents = async (queryPage) => {
     try {
         const ITEMS_PER_PAGE = 20;
         const page = +queryPage || 1;

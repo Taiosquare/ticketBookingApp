@@ -1,84 +1,77 @@
-// const express = require("express"),
-//   router = express.Router(),
-//   adminController = require("../../controllers/user/admin/admin"),
-//   { body, param } = require("express-validator"),
-//   authenticate = require("../../authentication/isAuth");
+const express = require("express");
+const router = express.Router();
+const adminController = require("../../controllers/user/admin/admin");
+const { check, param } = require("express-validator");
+const authenticate = require("../../authentication/isAuth");
 
-// router
-//   .route("/approveHost/:hostId")
-//     .put(
-//         authenticate.admin,
-//         adminController.approveHost
-//     );
+router
+    .route("/approveHost/:hostId")
+    .put(
+        authenticate,
+        adminController.approveHost
+    );
   
-// router
-//   .route("/suspendHost/:hostId")
-//     .put(
-//         authenticate.admin,
-//         adminController.suspendHost
-//     );
+router
+    .route("/suspendHost/:hostId")
+    .put(
+        authenticate,
+        adminController.suspendHost
+    );
   
-// router
-//   .route("/viewUser/:userId")
-//     .get(
-//         authenticate.admin,
-//         adminController.getUser
-//     );
+router
+    .route("/getUser/:userId")
+    .get(
+        authenticate,
+        adminController.getUser
+    );
 
-// router
-//   .route("/viewUsers")
-//     .get(
-//         authenticate.admin,
-//         adminController.getUsers
-//     );
+router
+    .route("/getUsers")
+    .get(
+        authenticate,
+        adminController.getUsers
+    );
     
-// // router
-// //   .route("/viewPurchasedTickets/:userId")
-// //     .get(
-// //         authenticate.admin,
-// //         adminController.getTickets
-// //     );
-    
-// router
-//   .route("/viewHost/:hostId")
-//     .get(
-//         authenticate.admin,
-//         adminController.getHost
-//     );
+router
+  .route("/getHost/:hostId")
+    .get(
+        authenticate,
+        adminController.getHost
+    );
 
-// router
-//   .route("/viewHosts")
-//     .get(
-//         authenticate.admin,
-//         adminController.getHosts
-//     );
+router
+  .route("/getHosts")
+    .get(
+        authenticate,
+        adminController.getHosts
+    );
     
-// router
-//   .route("/viewEvents")
-//     .get(
-//         authenticate.admin,
-//         adminController.getEvents
-//     );
+router
+  .route("/getEvents")
+    .get(
+        authenticate,
+        adminController.getEvents
+    );
     
-// router
-//   .route("/viewAdmin/:adminId")
-//     .get(
-//       authenticate.admin,
-//       adminController.getAdministrator
-//     );
+router
+  .route("/getAdmin/:adminId")
+    .get(
+      authenticate,
+      adminController.getAdministrator
+    );
 
-// router
-//   .route("/viewAdmins")
-//     .get(
-//       authenticate.admin,
-//       adminController.getAdministrators
-//     );
+router
+  .route("/getAdmins")
+    .get(
+      authenticate,
+      adminController.getAdministrators
+    );
     
-// router
-//   .route("/suspendAdmin/:adminId")
-//     .put(
-//       authenticate.admin,
-//       adminController.suspendAdministrator
-//     );
+router
+  .route("/suspendAdmin/:adminId")
+    .put(
+      authenticate,
+      adminController.suspendAdministrator
+    );
     
-// module.exports = router;
+module.exports = router;

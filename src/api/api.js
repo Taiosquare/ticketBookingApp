@@ -8,7 +8,7 @@ const express = require("express"),
     userRouter = require("./routers/user/user");
 
 api.use("/auth", authRouter);
-// api.use("/admin", adminRouter);
+api.use("/admin", adminRouter);
 // api.use("/host", hostRouter);
 // api.use("/system", systemRouter);
 // api.use("/upload", uploadRouter);
