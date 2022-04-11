@@ -33,42 +33,42 @@ router
     );
     
 router
-  .route("/getHost/:hostId")
+    .route("/getHost/:hostId")
     .get(
         authenticate,
         adminController.getHost
     );
 
 router
-  .route("/getHosts")
+    .route("/getHosts")
     .get(
         authenticate,
         adminController.getHosts
     );
     
 router
-  .route("/getEvents")
+    .route("/getEvents")
     .get(
         authenticate,
         adminController.getEvents
     );
     
 router
-  .route("/getAdmin/:adminId")
+    .route("/getAdmin/:adminId")
     .get(
       authenticate,
       adminController.getAdministrator
     );
 
 router
-  .route("/getAdmins")
+    .route("/getAdmins")
     .get(
       authenticate,
       adminController.getAdministrators
     );
     
 router
-  .route("/suspendAdmin/:adminId")
+    .route("/suspendAdmin/:adminId")
     .put(
       authenticate,
       adminController.suspendAdministrator

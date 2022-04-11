@@ -64,11 +64,13 @@ const DateRangeSchema = new Schema(
 const RatingSchema = new Schema(
     {
         averageScore: {
-            type: Number
+            type: Number,
+            default: 0
         },
 
         numOfRatings: {
-            type: Number
+            type: Number,
+            default: 0
         },
 
         ratings: [
@@ -142,10 +144,6 @@ const EventSchema = new Schema(
             type: String,
             required: true,
             index: "text"
-        },
-
-        keywords: {
-            type: [String]
         },
 
         description: {

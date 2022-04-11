@@ -200,6 +200,17 @@ const ussdPayment = async (req, res, eventId) => {
     }
 }
 
-module.exports.bankPayment = bankPayment;
-module.exports.bankPaymentVerification = bankPaymentVerification;
-module.exports.ussdPayment = ussdPayment;
+const checkIfDateHasPassed = (eventDate) => {
+    if (eventDate < new Date()) {
+        return StandardResponse.errorMessage("Events that have ended cannot be modified");
+    }  
+
+    return false;
+}
+
+module.exports.EventFunctions = {
+    bankPayment,
+    bankPaymentVerification,
+    ussdPayment,
+    checkIfDateHasPassed
+} 

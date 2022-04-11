@@ -5,7 +5,7 @@ const mailer = require("../../../../services/mailer");
 
 const approveHost = async (session, opts, hostId) => {
     try {
-        const res = await User.updateOne(
+        await User.updateOne(
             {
                 _id: hostId
             },

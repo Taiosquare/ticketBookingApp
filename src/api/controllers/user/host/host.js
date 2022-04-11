@@ -1,162 +1,136 @@
-// require("dotenv").config();
+const { Event } = require("../../../models/event");
+const { AuthFunctions } = require("../../../functions/auth/authFunctions");
+const { HostManager } = require("../../../managers/user/host/hostManager");
+const { startSession } = require("mongoose");
 
-// const { Event } = require("../models/event"),
-//   { Host } = require("../models/host"),
-//   { Account } = require("../models/account"),
-//   mongoose = require("mongoose"),
-//   GeneralFunctions = require("../functions/generalFunctions"),
-//   { validationResult } = require("express-validator"),
-//   fetch = require("node-fetch");
+exports.addEvent = async (req, res) => {
+    res.setHeader('access-token', req.token);
+    const session = await startSession();
 
-// exports.addEvent = async (req, res) => {
-//   try {
-//     res.setHeader('access-token', req.token);
-//     const errors = validationResult(req);
+    try {
+        const payloadValidation = await Validations.payloadValidation(req);
 
-//     if (!errors.isEmpty()) {
-//       return res.status(400).json({
-//         errors: await GeneralFunctions.validationErrorCheck(errors)
-//       });
-//     }
+        if (payloadValidation.status == false) {
+            return RouteResponse.validationError(payloadValidation, res);
+        }
 
-//     const {
-//       title, poster, type, category,
-//       keywords, description, location,
-//       tickets, minAge, dates, availableSpace
-//     } = req.body;
+        const userVerification = await Validations.userVerification(req, "host");
 
-//     let event = await Event.findOne({ title: title, host: req.user._id });
+        if (userVerification.status == false) {
+            return RouteResponse.validationError(userVerification, res);
+        }
 
-//     if (event) {
-//       return res.status(400).json({
-//         error: "Event already added",
-//       });
-//     }
+        session.startTransaction();
+        const opts = { session, new: true };
 
-//     let newEvent = new Event({
-//       _id: mongoose.Types.ObjectId(),
-//       title: title,
-//       poster: poster,
-//       type: type,
-//       category: category,
-//       keywords: keywords,
-//       description: description,
-//       location: location,
-//       tickets: tickets,
-//       minimumAge: minAge,
-//       dates: dates,
-//       availableSpace: availableSpace,
-//       rating: {
-//         averageScore: 0,
-//         numOfRatings: 0
-//       },
-//       users: [],
-//       host: req.user._id
-//     });
+        const addEvent = await HostManager.addEvent(session, opts, req.body, req.user._id);
 
-//     let host = await Host.findById(req.user._id);
+        if (addEvent.status == false) {
+            if (addEvent.serverError == true) {
+                throw addEvent.error;
+            }
+            
+            return RouteResponse.badRequest(addEvent, res);
+        } 
+        
+        RouteResponse.OkMessage201(addEvent, res);
+    } catch (error) {
+        console.log({ error });
 
-//     host.events.push(newEvent._id);
+        await session.abortTransaction();
+        session.endSession();
 
-//     [newEvent, host] = await Promise.all([newEvent.save(), host.save()]);
+        RouteResponse.internalServerError(
+            StandardResponse.serverError("Event could not be registered, please try again."), res
+        );
+    }
+}
 
-//     res.status(201).json({
-//       message: "Event successfully added",
-//       event: {
-//         _id: newEvent._id,
-//         title: newEvent.title,
-//         category: newEvent.category,
-//         location: newEvent.location,
-//         dates: newEvent.dates
-//       },
-//     });
-//   } catch (error) {
-//     res.status(400).json({
-//       error: "Event could not be registered, please try again.",
-//     });
-//   }
-// }
+exports.editEvent = async (req, res) => {
+    res.setHeader('access-token', req.token);
+    const session = await startSession();
+    
+    try {
+        const payloadValidation = await Validations.payloadValidation(req);
 
-// exports.editEvent = async (req, res) => {
-//   try {
-//     res.setHeader('access-token', req.token);
-//     const errors = validationResult(req),
-//       id = req.params.eventId;
+        if (payloadValidation.status == false) {
+            return RouteResponse.validationError(payloadValidation, res);
+        }
 
-//     if (!errors.isEmpty()) {
-//       return res.status(400).json({
-//         errors: await GeneralFunctions.validationErrorCheck(errors)
-//       });
-//     }
+        if (!AuthFunctions.verifyHost(req.params.eventId, req.user._id)) {
+            return RouteResponse.validationError(
+                StandardResponse.validationError("Invalid Host"), res
+            );
+        }
+        
+        session.startTransaction();
+        const opts = { session, new: true };
 
-//     let event = await Event.findById(id);
+        const editEvent = await HostManager.editEvent(session, opts, req.body, req.params.eventId);
 
-//     req.body.title && (event.title = req.body.title);
-//     req.body.poster && (event.poster = req.body.poster);
-//     req.body.type && (event.type = req.body.type);
-//     req.body.category && (event.category = req.body.category);
-//     (req.body.keywords || (req.body.keywords == null)) && (event.keywords = req.body.keywords);
-//     req.body.description && (event.description = req.body.description);
-//     req.body.location && (event.location = req.body.location);
-//     req.body.tickets && (event.tickets = req.body.tickets);
-//     (req.body.minimumAge || (req.body.minimumAge == null)) && (event.minimumAge = req.body.minimumAge);
-//     req.body.dates && (event.dates = req.body.dates);
-//     req.body.availableSpace && (event.availableSpace = req.body.availableSpace);
+        if (editEvent.status == false) {
+            if (editEvent.serverError == true) {
+                throw editEvent.error;
+            }
+            
+            return RouteResponse.badRequest(editEvent, res);
+        } 
+            
+        RouteResponse.OkMessage(editEvent, res);
+    } catch (error) {
+        console.log({ error });
 
-//     const result = await event.save();
+        await session.abortTransaction();
+        session.endSession();
 
-//     res.status(200).json({
-//       message: "Event Details Updated Successfully",
-//       event: {
-//         _id: result._id,
-//         title: result.title,
-//         category: result.category,
-//         location: result.location,
-//         dates: result.dates
-//       },
-//     });
-//   } catch (error) {
-//     res.status(400).json({
-//       error: "Event Details Failed to Update, please try again.",
-//     });
-//   }
-// }
+        RouteResponse.internalServerError(
+            StandardResponse.serverError("Event Details Failed to Update, please try again."), res
+        );
+    }
+}
 
-// exports.deleteEvent = async (req, res) => {
-//   try {
-//     res.setHeader('access-token', req.token);
-//     const errors = validationResult(req),
-//       id = req.params.eventId;
+exports.deleteEvent = async (req, res) => {
+    res.setHeader('access-token', req.token);
+    const session = await startSession();
 
-//     if (!errors.isEmpty()) {
-//       return res.status(400).json({
-//         errors: await GeneralFunctions.validationErrorCheck(errors)
-//       });
-//     }
+    try {
+        const payloadValidation = await Validations.payloadValidation(req);
 
-//     let event = await Event.findById(id);
+        if (payloadValidation.status == false) {
+            return RouteResponse.validationError(payloadValidation, res);
+        }
 
-//     if (event.host.toString() != req.user._id.toString()) {
-//       return res.status(400).json({
-//         error: "This User cannot delete this event",
-//       });
-//     }
+        if (!AuthFunctions.verifyHost(req.params.eventId, req.user._id)) {
+            return RouteResponse.validationError(
+                StandardResponse.validationError("Invalid Host"), res
+            );
+        }
 
-//     let host = await Host.findById(req.user._id);
+        session.startTransaction();
+        const opts = { session, new: true };
 
-//     host.events.pull(id);
+        const deleteEvent = await HostManager.editEvent(session, opts, req.body, req.params.eventId);
 
-//     await host.save();
+        if (deleteEvent.status == false) {
+            if (deleteEvent.serverError == true) {
+                throw deleteEvent.error;
+            }
+            
+            return RouteResponse.badRequest(deleteEvent, res);
+        } 
+            
+        RouteResponse.OkMessage(deleteEvent, res);
+    } catch (error) {
+        console.log({ error });
 
-//     await Event.findByIdAndDelete(id);
+        await session.abortTransaction();
+        session.endSession();
 
-//     res.status(200).json({
-//       message: "Event Deleted Successfully",
-//     });
-//   } catch (error) {
-//     res.status(400).json({ error: "Event Failed to Delete" });
-//   }
-// }
+        RouteResponse.internalServerError(
+            StandardResponse.serverError("Event Failed to Delete"), res
+        );
+    }
+}
 
 // // Retry Transfer in case the OTP expires
 
@@ -211,144 +185,134 @@
 //   }
 // }
 
-// exports.viewBookedUsers = async (req, res) => {
-//   try {
-//     res.setHeader('access-token', req.token);
-//     const errors = validationResult(req);
+exports.viewBookedUsers = async (req, res) => {
+    res.setHeader('access-token', req.token);
 
-//     if (!errors.isEmpty()) {
-//       return res.status(400).json({
-//         errors: await GeneralFunctions.validationErrorCheck(errors)
-//       });
-//     }
+    try {
+        const payloadValidation = await Validations.payloadValidation(req);
 
-//     const event = await Event.findById(req.params.eventId)
-//       .populate({
-//         path: 'users',
-//         populate: {
-//           path: 'user',
-//           select: 'username firstname lastname email'
-//         },
-//       });
+        if (payloadValidation.status == false) {
+            return RouteResponse.validationError(payloadValidation, res);
+        }
 
-//     res.status(200).json({ bookedUsers: event.users });
-//   } catch (error) {
-//     res.status(400).json({
-//       error: "Error Fetching User's Events, please try again.",
-//     });
-//   }
-// }
+        if (!AuthFunctions.verifyHost(req.params.eventId, req.user._id)) {
+            return RouteResponse.validationError(
+                StandardResponse.validationError("Invalid Host"), res
+            );
+        }
 
-// exports.viewEvent = async (req, res) => {
-//   try {
-//     res.setHeader('access-token', req.token);
-//     const errors = validationResult(req);
+        const event = await Event.findById(req.params.eventId)
+            .populate({
+                path: 'users',
+                populate: {
+                path: 'user',
+                    select: 'username firstname lastname email'
+                },
+            });
 
-//     if (!errors.isEmpty()) {
-//       return res.status(400).json({
-//         errors: await GeneralFunctions.validationErrorCheck(errors)
-//       });
-//     }
+        RouteResponse.OkMessage(
+            StandardResponse.successMessage(null, { bookedUsers: event.users }), res
+        );
+    } catch (error) {
+        console.log({ error });
 
-//     const eventId = mongoose.Types.ObjectId(req.params.id);
+        RouteResponse.internalServerError(
+            StandardResponse.serverError("Error Fetching Event's Booked Users, please try again."), res
+        );
+    }
+}
 
-//     const event = await Event.aggregate([
-//       { $match: { "_id": eventId } },
-//       {
-//         $project: {
-//           title: 1,
-//           poster: 1,
-//           location: {
-//             address: 1,
-//           },
-//           rating: {
-//             averageScore: 1,
-//             numOfRatings: 1
-//           },
-//           keywords: 1,
-//           category: 1,
-//           type: 1,
-//           description: 1,
-//           tickets: 1,
-//           minimumAge: 1,
-//           dates: 1,
-//           availableSpace: 1,
-//           users: 1,
-//           createdAt: 1,
-//           updatedAt: 1
-//         }
-//       }
-//     ]);
+exports.getEvent = async (req, res) => {
+    res.setHeader('access-token', req.token);
 
-//     res.status(200).json({ event: event[0] });
-//   } catch (error) {
-//     res.status(400).json({
-//       error: "Error Fetching Event Details, please try again.",
-//     });
-//   }
-// }
+    try {
+        const payloadValidation = await Validations.payloadValidation(req);
 
-// exports.viewEvents = async (req, res) => {
-//   try {
-//     res.setHeader('access-token', req.token);
+        if (payloadValidation.status == false) {
+            return RouteResponse.validationError(payloadValidation, res);
+        }
 
-//     const hostId = mongoose.Types.ObjectId(req.user._id);
+        const userVerification = await Validations.userVerification(req, "host");
 
-//     const events = await Event.aggregate([
-//       { $match: { "host": hostId } },
-//       {
-//         $project: {
-//           title: 1,
-//           category: 1,
-//           type: 1,
-//           image: "$poster.small",
-//           rating: "$rating.averageScore",
-//           state: "$location.state",
-//           from: "$dates.begin",
-//           to: "$dates.end"
-//         }
-//       }
-//     ]);
+        if (userVerification.status == false) {
+            return RouteResponse.validationError(userVerification, res);
+        }
 
-//     res.status(200).json({ events: events });
-//   } catch (error) {
-//     res.status(400).json({
-//       error: "Error Fetching User's Events, please try again.",
-//     });
-//   }
-// }
+        const event = await Event.aggregate([
+            { $match: { "_id": mongoose.Types.ObjectId(req.params.eventId) } },
+            {
+                $project: {
+                    title: 1,
+                    poster: 1,
+                    location: {
+                        address: 1,
+                    },
+                    rating: {
+                        averageScore: 1,
+                        numOfRatings: 1
+                    },
+                    keywords: 1,
+                    category: 1,
+                    type: 1,
+                    description: 1,
+                    tickets: 1,
+                    minimumAge: 1,
+                    dates: 1,
+                    availableSpace: 1,
+                    users: 1,
+                    createdAt: 1,
+                    updatedAt: 1
+                }
+            }
+        ]);
 
-// exports.updateAccountDetails = async (req, res) => {
-//   try {
-//     res.setHeader('access-token', req.token);
-//     const errors = validationResult(req);
+        RouteResponse.OkMessage(
+            StandardResponse.successMessage(null, { event: event[0] }), res
+        );
+    } catch (error) {
+        console.log({ error });
 
-//     if (!errors.isEmpty()) {
-//       return res.status(400).json({
-//         errors: await GeneralFunctions.validationErrorCheck(errors)
-//       });
-//     }
+        RouteResponse.internalServerError(
+            StandardResponse.serverError("Error Fetching Event Details, please try again."), res
+        );
+    }
+}
 
-//     let account = await Account.findOne({ host: req.user._id });
+exports.getEvents = async (req, res) => {
+    res.setHeader('access-token', req.token);
 
-//     req.body.accountName && (account.accountName = req.body.accountName);
-//     req.body.accountNumber && (account.accountNumber = req.body.accountNumber);
-//     req.body.bank && (account.bank = req.body.bank);
+    try {
+        const userVerification = await Validations.userVerification(req, "host");
 
-//     const result = await account.save();
+        if (userVerification.status == false) {
+            return RouteResponse.validationError(userVerification, res);
+        }
 
-//     res.status(200).json({
-//       message: "Account Details Updated Successfully",
-//       account: {
-//         _id: result._id,
-//         accountName: result.accountName,
-//         accountNumber: result.accountNumber,
-//         bank: result.bank,
-//       },
-//     });
-//   } catch (error) {
-//     res.status(400).json({
-//       error: "Event Details Failed to Update, please try again.",
-//     });
-//   }
-// }
+        const events = await Event.aggregate([
+            { $match: { "host": mongoose.Types.ObjectId(req.user._id) } },
+            {
+                $project: {
+                    title: 1,
+                    category: 1,
+                    type: 1,
+                    image: 1,
+                    rating: "$rating.averageScore",
+                    state: "$location.state",
+                    from: "$dates.start",
+                    to: "$dates.end"
+                }
+            }
+        ]);
+
+        RouteResponse.OkMessage(
+            StandardResponse.successMessage(null, { events: events }), res
+        );
+    } catch (error) {
+        console.log({ error });
+
+        RouteResponse.internalServerError(
+            StandardResponse.serverError("Error Fetching User's Events, please try again."), res
+        );
+    }
+}
+

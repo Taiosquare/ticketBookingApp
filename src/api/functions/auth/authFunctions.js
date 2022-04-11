@@ -123,6 +123,16 @@ const findUserByToken = async (token) => {
     return await User.findOne({ resetToken: token });
 }
 
+const verifyHost = (eventId, userId) => {
+    const event = await Event.findById(eventId);
+
+    if (event.host.toString() != userId.toString()) {
+        return false;
+    }
+
+    return true;
+}
+
 module.exports.AuthFunctions = {
     decodeToken,
     generateAuthToken,
@@ -130,5 +140,6 @@ module.exports.AuthFunctions = {
     hashPassword,
     userExists,
     findUserByEmail,
-    findUserByToken
+    findUserByToken,
+    verifyHost
 } 
