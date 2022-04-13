@@ -125,7 +125,6 @@ const EventSchema = new Schema(
         title: {
             type: String,
             required: true,
-            index: "text"
         },
 
         poster: {
@@ -136,13 +135,11 @@ const EventSchema = new Schema(
         type: {
             type: String,
             required: true,
-            index: "text"
         },
 
         category: {
             type: String,
             required: true,
-            index: "text"
         },
 
         keywords: {

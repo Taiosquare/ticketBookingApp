@@ -67,7 +67,7 @@ const addEvent = async (session, opts, requestBody, hostId) => {
 
 const editEvent = async (session, opts, requestBody, eventId) => {
     try {
-        const event = await Event.findById(eventId);
+        const event = await EventFunctions.getEventById(eventId);
 
         if (EventFunctions.checkIfDateHasPassed(event.dates.end)) {
             return StandardResponse.errorMessage("Events that have ended cannot be modified");
@@ -108,7 +108,7 @@ const editEvent = async (session, opts, requestBody, eventId) => {
 
 const deleteEvent = async (eventId, hostId) => {
     try { 
-        const event = await Event.findById(eventId);
+        const event = await EventFunctions.getEventById(eventId);
 
         if (EventFunctions.checkIfDateHasPassed(event.dates.start)) {
             return StandardResponse.errorMessage("Events that have ended cannot be deleted");
@@ -140,3 +140,8 @@ module.exports.HostManager = {
     editEvent,
     deleteEvent
 };
+
+
+
+
+

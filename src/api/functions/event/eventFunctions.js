@@ -208,9 +208,14 @@ const checkIfDateHasPassed = (eventDate) => {
     return false;
 }
 
+const getEventById = (eventId) => {
+    return await Event.findById(eventId);
+}
+
 module.exports.EventFunctions = {
     bankPayment,
     bankPaymentVerification,
     ussdPayment,
-    checkIfDateHasPassed
+    checkIfDateHasPassed,
+    getEventById
 } 
