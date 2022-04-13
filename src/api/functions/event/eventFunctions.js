@@ -202,7 +202,7 @@ const ussdPayment = async (req, res, eventId) => {
 
 const checkIfDateHasPassed = (eventDate) => {
     if (eventDate < new Date()) {
-        return StandardResponse.errorMessage("Events that have ended cannot be modified");
+        return true;
     }  
 
     return false;

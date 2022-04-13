@@ -6,7 +6,7 @@ const mongoose = require("mongoose");
 
 const addEvent = async (session, opts, requestBody, hostId) => {
     try {
-        const { title, poster, type, category, description,
+        const { title, poster, type, category, keywords, description,
             location, tickets, minimumAge, dates, availableSpace
         } = requestBody;
 
@@ -38,14 +38,11 @@ const addEvent = async (session, opts, requestBody, hostId) => {
             {
                 _id: hostId
             },
-            [
-                {
-                    $push: {
-                        events: savedObject._id
-                    }
+            {
+                $push: {
+                    events: savedObject[0]._id
                 }
-            ],
-            opts
+            }
         );
 
         await session.commitTransaction();
@@ -55,11 +52,11 @@ const addEvent = async (session, opts, requestBody, hostId) => {
             "Event successfully added",
             {
                 event: {
-                    _id: newEvent._id,
-                    title: newEvent.title,
-                    category: newEvent.category,
-                    location: newEvent.location,
-                    dates: newEvent.dates
+                    _id: savedObject[0]._id,
+                    title: savedObject[0].title,
+                    category: savedObject[0].category,
+                    location: savedObject[0].location,
+                    dates: savedObject[0].dates
                 }
             }
         );
@@ -109,30 +106,26 @@ const editEvent = async (session, opts, requestBody, eventId) => {
     }
 }
 
-const deleteEvent = (session, opts, eventId, hostId ) => {
+const deleteEvent = async (eventId, hostId) => {
     try { 
+        const event = await Event.findById(eventId);
+
         if (EventFunctions.checkIfDateHasPassed(event.dates.start)) {
-            return StandardResponse.errorMessage("Events that have ended cannot be modified");
+            return StandardResponse.errorMessage("Events that have ended cannot be deleted");
         }
 
         await User.updateOne(
             {
                 _id: hostId
             },
-            [
-                {
-                    $pull: {
-                        events: eventId
-                    }
+            {
+                $pull: {
+                    events: mongoose.Types.ObjectId(eventId)
                 }
-            ],
-            opts
+            }
         );
 
         await Event.findByIdAndDelete(eventId);
-
-        await session.commitTransaction();
-        session.endSession();
 
         return StandardResponse.successMessage(
             "Event Deleted Successfully",

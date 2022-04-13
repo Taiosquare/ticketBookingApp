@@ -19,7 +19,6 @@ const LocationSchema = new Schema(
     {
         _id: {
             type: ObjectId,
-            required: true,
         },
 
         state: {
@@ -32,7 +31,7 @@ const LocationSchema = new Schema(
             required: true,
         },
 
-        city: {
+        town: {
             type: String,
             required: true,
         },
@@ -144,6 +143,10 @@ const EventSchema = new Schema(
             type: String,
             required: true,
             index: "text"
+        },
+
+        keywords: {
+            type: [String]
         },
 
         description: {

@@ -1,7 +1,11 @@
 const { Event } = require("../../../models/event");
 const { AuthFunctions } = require("../../../functions/auth/authFunctions");
 const { HostManager } = require("../../../managers/user/host/hostManager");
+const { RouteResponse } = require("../../../helpers/routeResponse");
+const { StandardResponse } = require("../../../helpers/standardResponse");
+const { Validations } = require("../../../helpers/validations");
 const { startSession } = require("mongoose");
+const mongoose = require("mongoose");
 
 exports.addEvent = async (req, res) => {
     res.setHeader('access-token', req.token);
@@ -57,7 +61,7 @@ exports.editEvent = async (req, res) => {
             return RouteResponse.validationError(payloadValidation, res);
         }
 
-        if (!AuthFunctions.verifyHost(req.params.eventId, req.user._id)) {
+        if (!await AuthFunctions.verifyHost(req.params.eventId, req.user._id)) {
             return RouteResponse.validationError(
                 StandardResponse.validationError("Invalid Host"), res
             );
@@ -91,7 +95,6 @@ exports.editEvent = async (req, res) => {
 
 exports.deleteEvent = async (req, res) => {
     res.setHeader('access-token', req.token);
-    const session = await startSession();
 
     try {
         const payloadValidation = await Validations.payloadValidation(req);
@@ -100,16 +103,13 @@ exports.deleteEvent = async (req, res) => {
             return RouteResponse.validationError(payloadValidation, res);
         }
 
-        if (!AuthFunctions.verifyHost(req.params.eventId, req.user._id)) {
+        if (!await AuthFunctions.verifyHost(req.params.eventId, req.user._id)) {
             return RouteResponse.validationError(
                 StandardResponse.validationError("Invalid Host"), res
             );
         }
 
-        session.startTransaction();
-        const opts = { session, new: true };
-
-        const deleteEvent = await HostManager.editEvent(session, opts, req.body, req.params.eventId);
+        const deleteEvent = await HostManager.deleteEvent(req.params.eventId, req.user._id);
 
         if (deleteEvent.status == false) {
             if (deleteEvent.serverError == true) {
@@ -122,9 +122,6 @@ exports.deleteEvent = async (req, res) => {
         RouteResponse.OkMessage(deleteEvent, res);
     } catch (error) {
         console.log({ error });
-
-        await session.abortTransaction();
-        session.endSession();
 
         RouteResponse.internalServerError(
             StandardResponse.serverError("Event Failed to Delete"), res
@@ -185,7 +182,7 @@ exports.deleteEvent = async (req, res) => {
 //   }
 // }
 
-exports.viewBookedUsers = async (req, res) => {
+exports.getBookedUsers = async (req, res) => {
     res.setHeader('access-token', req.token);
 
     try {
@@ -195,7 +192,7 @@ exports.viewBookedUsers = async (req, res) => {
             return RouteResponse.validationError(payloadValidation, res);
         }
 
-        if (!AuthFunctions.verifyHost(req.params.eventId, req.user._id)) {
+        if (!await AuthFunctions.verifyHost(req.params.eventId, req.user._id)) {
             return RouteResponse.validationError(
                 StandardResponse.validationError("Invalid Host"), res
             );
@@ -203,7 +200,7 @@ exports.viewBookedUsers = async (req, res) => {
 
         const event = await Event.findById(req.params.eventId)
             .populate({
-                path: 'users',
+                path: 'attendees',
                 populate: {
                 path: 'user',
                     select: 'username firstname lastname email'
@@ -211,7 +208,7 @@ exports.viewBookedUsers = async (req, res) => {
             });
 
         RouteResponse.OkMessage(
-            StandardResponse.successMessage(null, { bookedUsers: event.users }), res
+            StandardResponse.successMessage(null, { bookedUsers: event.attendees }), res
         );
     } catch (error) {
         console.log({ error });
@@ -265,6 +262,8 @@ exports.getEvent = async (req, res) => {
                 }
             }
         ]);
+
+        console.log(event);
 
         RouteResponse.OkMessage(
             StandardResponse.successMessage(null, { event: event[0] }), res

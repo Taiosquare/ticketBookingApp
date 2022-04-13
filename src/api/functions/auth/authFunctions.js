@@ -2,6 +2,7 @@ const config = require("../../../../config");
 const jwt = require("jsonwebtoken");
 const argon2 = require("argon2");
 const { User } = require("../../models/user");
+const { Event } = require("../../models/event");
 
 const generateAuthToken = function (id) {
     const
@@ -123,7 +124,7 @@ const findUserByToken = async (token) => {
     return await User.findOne({ resetToken: token });
 }
 
-const verifyHost = (eventId, userId) => {
+const verifyHost = async (eventId, userId) => {
     const event = await Event.findById(eventId);
 
     if (event.host.toString() != userId.toString()) {

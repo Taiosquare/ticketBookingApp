@@ -9,7 +9,7 @@ router
     .route("/host/updateAccount")
     .patch(
         authenticate,
-        hostController.updateAccountDetails
+        hostController.updatePaymentDetails
     );
     
 module.exports = router;

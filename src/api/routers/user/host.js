@@ -33,10 +33,10 @@ router
 //   );
 
 router
-    .route("/viewBookedUsers/:eventId")
+    .route("/getBookedUsers/:eventId")
     .get(
         authenticate,
-        hostController.viewBookedUsers
+        hostController.getBookedUsers
     );
 
 router
