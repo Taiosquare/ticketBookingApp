@@ -39,13 +39,6 @@ router
         userController.saveEventDetails
     );
 
-// router
-//     .route("/eventUSSDPayment/:eventId")
-//     .post(
-//         authenticate,
-//         userController.eventUSSDPayment
-//     );
-
 router
     .route("/getEvent/:eventId")
     .get(

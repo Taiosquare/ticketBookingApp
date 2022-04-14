@@ -1,39 +1,34 @@
 const fetch = require("node-fetch");
 
-const authFetchApi = async (
-    url,
-    method = "",
-    header,
-    body = {}
-) => {
-    let params = {
-        body: JSON.stringify(body),
+const fetchApi = async (url, method = "", token, body = {}) => {
+    const params = {
         method: method,
         headers: {
-            Authorization: `Bearer ${header}`,
-            "Content-Type": "application/json",
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
         },
+        body: JSON.stringify(body),    
     };
-    let apiCall = await fetch(url, params);
-    let response = await apiCall.json();
+
+    const apiCall = await fetch(url, params);
+    const response = await apiCall.json();
+    
     return response;
 };
 
-const getFetchApi = async (
-    url,
-    method = "",
-    header
-) => {
-    let params = {
+const getFetchApi = async (url, method = "", token) => {
+    const params = {
         method: method,
         headers: {
-            Authorization: `Bearer ${header}`,
-            "Content-Type": "application/json",
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
         },
     };
-    let apiCall = await fetch(url, params);
-    let response = await apiCall.json();
+
+    const apiCall = await fetch(url, params);
+    const response = await apiCall.json();
+    
     return response;
 };
 
-module.exports.apiCall = { authFetchApi, getFetchApi }
+module.exports.ApiCall = { fetchApi, getFetchApi }

@@ -1,5 +1,4 @@
 const { User } = require("../../../models/user");
-const { Event } = require("../../../models/event");
 const { StandardResponse } = require("../../../helpers/standardResponse");
 const { EventFunctions } = require("../../../functions/event/eventFunctions"); 
 const mongoose = require("mongoose");
@@ -57,22 +56,12 @@ const rateEvent = (session, opts, requestBody, eventId, userId) => {
     }
 }
 
-const eventBankPayment = () => {
-
-}
-
-const eventBankPaymentVerification = () => {
-
-}
-
 const saveEventDetails = () => {
 
 }
 
 module.exports.UserManager = {
     rateEvent,
-    eventBankPayment,
-    eventBankPaymentVerification,
     saveEventDetails
 };
 

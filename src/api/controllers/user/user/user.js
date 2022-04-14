@@ -1,8 +1,8 @@
 const { Event } = require("../../../models/event");
 const { User } = require("../../../models/user");
 const { GeneralFunctions }= require("../../../functions/generalFunctions");
-const { EventFunctions } = require("../../../functions/eventFunctions");
 const { UserManager } = require("../../../managers/user/user/userManager");
+const { PaymentManager } = require("../../../managers/user/user/paymentManager");
 const mongoose = require("mongoose");
 const { startSession } = require("mongoose");
 
@@ -124,13 +124,79 @@ exports.rateEvent = async (req, res) => {
 }
 
 exports.eventBankPayment = async (req, res) => {
-  EventFunctions.bankPayment(req, res, req.params.eventId);
+    res.setHeader('access-token', req.token);
+
+    try {
+        const payloadValidation = await Validations.payloadValidation(req);
+
+        if (payloadValidation.status == false) {
+            return RouteResponse.validationError(payloadValidation, res);
+        }
+
+        const userVerification = await Validations.userVerification(req, "regularUser");
+
+        if (userVerification.status == false) {
+            return RouteResponse.validationError(userVerification, res);
+        }
+
+        const eventBankPayment = await PaymentManager.eventBankPayment(req.body, req.params.eventId);
+
+        if (eventBankPayment.status == false) {
+            if (eventBankPayment.serverError == true) {
+                throw eventBankPayment.error;
+            }
+            
+            return RouteResponse.badRequest(eventBankPayment, res);
+        } 
+
+        RouteResponse.OkMessage(eventBankPayment, res);
+    } catch (error) {
+        console.log({ error });
+
+        RouteResponse.internalServerError(
+            StandardResponse.serverError("An error occurred while trying to initiate the payment, please try again."), res
+        );
+    }
 }
 
 exports.eventBankPaymentVerification = async (req, res) => {
-  EventFunctions.bankPaymentVerification(req, res, req.params.eventId);
+    // EventFunctions.bankPaymentVerification(req, res, req.params.eventId);
+    res.setHeader('access-token', req.token);
+
+    try {
+        const payloadValidation = await Validations.payloadValidation(req);
+
+        if (payloadValidation.status == false) {
+            return RouteResponse.validationError(payloadValidation, res);
+        }
+
+        const userVerification = await Validations.userVerification(req, "regularUser");
+
+        if (userVerification.status == false) {
+            return RouteResponse.validationError(userVerification, res);
+        }
+
+        const eventBankPaymentVerification = await PaymentManager.eventBankPaymentVerification(req.body, req.params.eventId);
+
+        if (eventBankPaymentVerification.status == false) {
+            if (eventBankPaymentVerification.serverError == true) {
+                throw eventBankPaymentVerification.error;
+            }
+            
+            return RouteResponse.badRequest(eventBankPaymentVerification, res);
+        } 
+
+        RouteResponse.OkMessage(eventBankPaymentVerification, res);
+    } catch (error) {
+        console.log({ error });
+
+        RouteResponse.internalServerError(
+            StandardResponse.serverError("An error occurred while trying to verify payment, please try again."), res
+        );
+    }
 }
 
+// Replicate the workflow for ED
 exports.saveEventDetails = async (req, res) => {
   try {
     res.setHeader('access-token', req.token);
@@ -182,10 +248,6 @@ exports.saveEventDetails = async (req, res) => {
     });
   }
 }
-
-// exports.eventUSSDPayment = async (req, res) => {
-//   EventFunctions.ussdPayment(req, res, req.params.eventId);
-// }
 
 exports.getEvent = async (req, res) => {
     res.setHeader('access-token', req.token);
@@ -291,3 +353,5 @@ exports.getBookedEvents = async (req, res) => {
 }
 
 
+
+// Cron job for setting the isUsed field to 'true' after an event ends
