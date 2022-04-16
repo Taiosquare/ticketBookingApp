@@ -1,6 +1,6 @@
+const { User } = require("../../models/user");
 const { Event } = require("../../models/event");
 const { Ticket } = require("../../models/ticket");
-const { UserFunctions } = require("../../functions/user/userFunctions");
 const crypto = require("crypto");
 const mongoose = require("mongoose");
 
@@ -45,12 +45,43 @@ const checkIfDateHasPassed = (eventDate) => {
     return false;
 }
 
-const getEventById = (eventId) => {
+const getEventById = async (eventId) => {
     return await Event.findById(eventId);
+}
+
+const saveBookingDetails = async (requestBody, eventId, userId) => {
+    const { spacesBooked } = requestBody;
+
+    await Event.updateOne(
+        { _id: eventId },
+        {
+            $inc: { availableSpace: -Math.abs(spacesBooked) },
+            $inc: { "tickets.availableTickets": - Math.abs(spacesBooked) },
+            $push: {
+                attendees: {
+                    user: req.user._id,
+                    spacesBooked: spacesBooked
+                }
+            }
+        }
+    );
+
+    await User.updateOne(
+        { _id: userId },
+        {
+            $push: {
+                bookedEvents: {
+                    event: eventId,
+                    spacesBooked: spacesBooked
+                }
+            }
+        }
+    );
 }
 
 module.exports.EventFunctions = {
     generateTickets,
     checkIfDateHasPassed,
-    getEventById
+    getEventById,
+    saveBookingDetails
 } 

@@ -60,7 +60,7 @@ const BookedEventSchema = new Schema(
             ref: "event",
         },
 
-        spacesReserved: {
+        spacesBooked: {
             type: Number,
             required: true,
         },
@@ -79,10 +79,6 @@ const BusinessDetailsSchema = new Schema(
             required: true,
             trim: true,
             lowercase: true,
-        },
-
-        type: {
-            type: String,
         },
 
         description: {

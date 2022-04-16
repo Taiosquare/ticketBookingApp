@@ -4,15 +4,15 @@ const { ApiCall } = require("../../../helpers/apiCall");
 const { EventFunctions } = require("../../../functions/event/eventFunctions");
 const config = require("../../../../../config");
 
-const eventBankPayment = async (requestBody, eventId) => {
+const initiateEventPayment = async (requestBody, eventId) => {
     try {
-        const { email, bank, birthday, numOfTickets } = requestBody;
+        const { email, bank, birthday, spacesBooked } = requestBody;
 
         const event = await Event.findById(eventId);
 
         const params = {
             email: email,
-            amount: (event.tickets.price * numOfTickets) * 100,
+            amount: (event.tickets.price * spacesBooked) * 100,
             bank: bank,
             birthday: birthday
         };
@@ -39,9 +39,9 @@ const eventBankPayment = async (requestBody, eventId) => {
     }
 }
 
-const eventBankPaymentVerification = async (requestBody, eventId) => {
+const verifyEventPayment = async (requestBody, eventId) => {
     try {
-        const { otp, reference, numOfTickets } = requestBody;
+        const { otp, reference, spacesBooked } = requestBody;
 
         const event = await Event.findById(eventId);
 
@@ -65,7 +65,7 @@ const eventBankPaymentVerification = async (requestBody, eventId) => {
         );
 
         if (response.status == true) {
-            await EventFunctions.generateTickets(event, numOfTickets, reference, req.user._id);
+            await EventFunctions.generateTickets(event, spacesBooked, reference, req.user._id);
 
             return StandardResponse.successMessage(
                 'Payment has successfully been verified.'
@@ -79,6 +79,6 @@ const eventBankPaymentVerification = async (requestBody, eventId) => {
 }
 
 module.exports.PaymentManager = {
-    eventBankPayment,
-    eventBankPaymentVerification
+    initiateEventPayment,
+    verifyEventPayment
 };

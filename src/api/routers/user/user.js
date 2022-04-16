@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const userController = require("../../controllers/user/user/user");
+const paymentController = require("../../controllers/user/user/payment");
 const { check, param } = require("express-validator");
 const authenticate = require("../../authentication/isAuth");
 
@@ -19,24 +20,17 @@ router
     );
 
 router
-    .route("/eventBankPayment/:eventId")
+    .route("/initiateEventPayment/:eventId")
     .post(
         authenticate,
-        userController.eventBankPayment
+        paymentController.initiateEventPayment
     );
 
 router
-    .route("/eventBankPaymentVerification/:eventId")
+    .route("/verifyEventPayment/:eventId")
     .put(
         authenticate,
-        userController.eventBankPaymentVerification
-    );
-
-router
-    .route("/bookEvent/:eventId")
-    .post(
-        authenticate,
-        userController.saveEventDetails
+        paymentController.verifyEventPayment
     );
 
 router

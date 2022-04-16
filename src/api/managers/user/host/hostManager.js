@@ -30,6 +30,11 @@ const addEvent = async (session, opts, requestBody, hostId) => {
                 minimumAge: minimumAge,
                 dates: dates,
                 availableSpace: availableSpace,
+                rating: {
+                    averageScore: 0,
+                    numOfRatings: 0,
+                    ratings: [],
+                },
                 host: hostId
             }
         ], opts);

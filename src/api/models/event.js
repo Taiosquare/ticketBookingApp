@@ -135,11 +135,23 @@ const EventSchema = new Schema(
         type: {
             type: String,
             required: true,
+            enum: [
+                'Physical',
+                'Virtual',
+            ],
         },
 
         category: {
             type: String,
             required: true,
+            enum: [
+                'Entertainment',
+                'Business',
+                'Educational',
+                'Technological',
+                'Religious',
+                'Other'
+            ],
         },
 
         keywords: {
@@ -189,7 +201,7 @@ const EventSchema = new Schema(
                     ref: "user",
                 },
 
-                numOfTickets: {
+                spacesBooked: {
                     type: Number,
                 }
             }
