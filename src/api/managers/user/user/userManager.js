@@ -7,6 +7,7 @@ const rateEvent = async (session, opts, requestBody, eventId, userId) => {
     try {
         let event = await EventFunctions.getEventById(eventId);
 
+        // Sort this out
         // if (event.rating.ratings.user.includes(userId)) {
         //     return StandardResponse.errorMessage("This user has rated this event before");
         // }
@@ -22,11 +23,11 @@ const rateEvent = async (session, opts, requestBody, eventId, userId) => {
             }
         );
 
-        const totalRatingsSum = event.rating.ratings.reduce(function (a, b) {
-            return a + b;
-        }, 0);
+        let totalRatingsSum = 0;
 
-        console.log(totalRatingsSum);
+        for (userRating of event.rating.ratings) {
+            totalRatingsSum += userRating.score;
+        }
 
         event.rating.averageScore = (totalRatingsSum) / event.rating.numOfRatings;
 

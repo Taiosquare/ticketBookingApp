@@ -22,7 +22,7 @@ const initiateEventPayment = async (requestBody, eventId) => {
             'POST',
             config.PAYSTACK_TEST_SECRET,
             params
-        )
+        );
 
         if (response.status == true) {
             return StandardResponse.successMessage(
@@ -39,7 +39,7 @@ const initiateEventPayment = async (requestBody, eventId) => {
     }
 }
 
-const verifyEventPayment = async (requestBody, eventId) => {
+const verifyEventPayment = async (requestBody, eventId, userId) => {
     try {
         const { otp, reference, spacesBooked } = requestBody;
 
@@ -65,7 +65,7 @@ const verifyEventPayment = async (requestBody, eventId) => {
         );
 
         if (response.status == true) {
-            await EventFunctions.generateTickets(event, spacesBooked, reference, req.user._id);
+            await EventFunctions.generateTickets(event, spacesBooked, reference, userId);
 
             return StandardResponse.successMessage(
                 'Payment has successfully been verified.'

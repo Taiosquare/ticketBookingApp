@@ -12,7 +12,7 @@ const fetchApi = async (url, method = "", token, body = {}) => {
 
     const apiCall = await fetch(url, params);
     const response = await apiCall.json();
-    
+
     return response;
 };
 

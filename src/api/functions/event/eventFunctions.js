@@ -4,12 +4,14 @@ const { Ticket } = require("../../models/ticket");
 const crypto = require("crypto");
 const mongoose = require("mongoose");
 
-const generateTickets = async (event, numOfTickets, reference, userId) => {
+const generateTickets = async (event, spacesBooked, reference, userId) => { 
     let tickets = [];
 
-    for (let i = 0; i < numOfTickets; i++) {
+    for (let i = 0; i < spacesBooked; i++) {
+        let ticketID = await crypto.randomBytes(8).toString("hex");
+
         const ticket = {
-            ticketID: await crypto.randomBytes(8),
+            ticketID: ticketID,
             event: {
                 _id: event._id,
                 title: event.title,
@@ -24,7 +26,16 @@ const generateTickets = async (event, numOfTickets, reference, userId) => {
         await Ticket.create({
             _id: mongoose.Types.ObjectId(),
             user: userId,
-            ticket,
+            ticketID: ticketID,
+            event: {
+                _id: event._id,
+                title: event.title,
+                type: event.type,
+                category: event.category,
+                dates: event.dates
+            },
+            price: event.tickets.price,
+            paymentReference: reference,
             paymentStatus: "Paid",
         })
        
@@ -52,21 +63,23 @@ const getEventById = async (eventId) => {
 const saveBookingDetails = async (requestBody, eventId, userId) => {
     const { spacesBooked } = requestBody;
 
-    await Event.updateOne(
+    const res1 = await Event.updateOne(
         { _id: eventId },
         {
             $inc: { availableSpace: -Math.abs(spacesBooked) },
             $inc: { "tickets.availableTickets": - Math.abs(spacesBooked) },
             $push: {
                 attendees: {
-                    user: req.user._id,
+                    user: userId,
                     spacesBooked: spacesBooked
                 }
             }
         }
     );
 
-    await User.updateOne(
+    console.log(res1);
+
+    const res2 = await User.updateOne(
         { _id: userId },
         {
             $push: {
@@ -77,6 +90,8 @@ const saveBookingDetails = async (requestBody, eventId, userId) => {
             }
         }
     );
+
+    console.log(res2);
 }
 
 module.exports.EventFunctions = {

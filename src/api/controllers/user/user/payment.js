@@ -56,17 +56,17 @@ exports.verifyEventPayment = async (req, res) => {
             return RouteResponse.validationError(userVerification, res);
         }
 
-        const eventBankPaymentVerification = await PaymentManager.verifyEventPayment(req.body, req.params.eventId);
+        // const eventBankPaymentVerification = await PaymentManager.verifyEventPayment(req.body, req.params.eventId, req.user._id);
 
-        if (eventBankPaymentVerification.status == false) {
-            if (eventBankPaymentVerification.serverError == true) {
-                throw eventBankPaymentVerification.error;
-            }
+        // if (eventBankPaymentVerification.status == false) {
+        //     if (eventBankPaymentVerification.serverError == true) {
+        //         throw eventBankPaymentVerification.error;
+        //     }
             
-            return RouteResponse.badRequest(eventBankPaymentVerification, res);
-        } 
+        //     return RouteResponse.badRequest(eventBankPaymentVerification, res);
+        // } 
 
-        RouteResponse.OkMessage(eventBankPaymentVerification, res);
+        // RouteResponse.OkMessage(eventBankPaymentVerification, res);
     
         await EventFunctions.saveBookingDetails(req.body, req.params.eventId, req.user._id);
     } catch (error) {
