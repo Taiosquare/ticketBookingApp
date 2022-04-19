@@ -1,0 +1,50 @@
+{
+  "name": "users",
+  "version": "1.0.0",
+  "description": "Users Microservice for a Ticket Booking Application",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon src/app.js",
+    "test": "jest --watch"
+  },
+  "author": "taiosquare",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "argon2": "^0.28.5",
+    "aws-sdk": "^2.1116.0",
+    "body-parser": "^1.19.0",
+    "compression": "^1.7.4",
+    "crypto": "^1.0.1",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "express-validator": "^6.6.1",
+    "helmet": "^4.2.0",
+    "jsonwebtoken": "^8.5.1",
+    "mailgun-js": "^0.22.0",
+    "mongodb": "^3.6.3",
+    "mongoose": "^5.10.15",
+    "node-fetch": "^2.6.7",
+    "nodemon": "^2.0.6",
+    "passport": "^0.4.1",
+    "passport-facebook": "^3.0.0",
+    "passport-google-oauth": "^2.0.0",
+    "passport-twitter": "^1.0.4",
+    "paystack": "^2.0.1",
+    "socket.io": "^3.0.3",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "jest": "^26.6.3",
+    "sinon": "^9.2.1",
+    "supertest": "^6.1.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Taiosquare/ticket-booking-app.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Taiosquare/ticket-booking-app/issues"
+  },
+  "homepage": "https://github.com/Taiosquare/ticket-booking-app#readme"
+}

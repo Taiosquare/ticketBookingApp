@@ -1,0 +1,32 @@
+{
+  "name": "system",
+  "version": "1.0.0",
+  "description": "System Microservice for a Ticket Booking Application",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon src/app.js",
+    "test": "jest --watch"
+  },
+  "author": "taiosquare",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "argon2": "^0.28.5",
+    "body-parser": "^1.20.0",
+    "compression": "^1.7.4",
+    "express": "^4.17.3",
+    "helmet": "^5.0.2",
+    "jsonwebtoken": "^8.5.1",
+    "mongodb": "^4.5.0",
+    "mongoose": "^6.3.0",
+    "node-cron": "^3.0.0",
+    "socket.io": "^4.4.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Taiosquare/ticket-booking-app.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Taiosquare/ticket-booking-app/issues"
+  },
+  "homepage": "https://github.com/Taiosquare/ticket-booking-app#readme"
+}
