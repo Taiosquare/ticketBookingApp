@@ -73,5 +73,7 @@ router
       authenticate,
       adminController.suspendAdministrator
     );
+
+// Get ticket
     
 module.exports = router;

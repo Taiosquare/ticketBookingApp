@@ -52,5 +52,7 @@ router
         authenticate,
         hostController.getEvents
     );
+    
+// Suspend Account
 
 module.exports = router;

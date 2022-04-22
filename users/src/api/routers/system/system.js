@@ -6,16 +6,15 @@ const authenticate = require("../../authentication/isAuth");
 
 router
     .route("/getSignedURL")
-    .post(
-        authenticate,
-        systemController.paymentSuccess
+    .get(
+        systemController.getSignedURL
     );
 
 router
     .route("/getSignedURLAuth")
-    .post(
+    .get(
         authenticate,
-        systemController.payHost
+        systemController.getSignedURLAuth
     );
 
 module.exports = router;

@@ -1,8 +1,8 @@
 const AWS = require('aws-sdk');
 const { v4: uuidv4 } = require('uuid');
 const config = require('../../../../config');
-const { RouteResponse } = require("../../../helpers/routeResponse");
-const { StandardResponse } = require("../../../helpers/standardResponse");
+const { RouteResponse } = require("../../helpers/routeResponse");
+const { StandardResponse } = require("../../helpers/standardResponse");
 
 const getSignedURL = (req, res) => {
     try {
@@ -12,7 +12,7 @@ const getSignedURL = (req, res) => {
         });
 
         const signedURL = s3.getSignedUrl('putObject', {
-            Bucket: config.BUCKET,
+            Bucket: config.S3_BUCKET,
             ContentType: 'image/jpeg',
             Key: req.body.fileName
         });
@@ -24,7 +24,7 @@ const getSignedURL = (req, res) => {
         console.log({ error });
 
         RouteResponse.internalServerError(
-            StandardResponse.serverError("Server Error, Files could not be uploaded"), res
+            StandardResponse.serverError("Signed URL could not be retrieved"), res
         );
     }
 }

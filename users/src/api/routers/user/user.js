@@ -46,5 +46,7 @@ router
         authenticate,
         userController.getBookedEvents
     );
+    
+// Suspend Account
 
 module.exports = router;
