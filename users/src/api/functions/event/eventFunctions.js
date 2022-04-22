@@ -92,9 +92,57 @@ const saveBookingDetails = async (requestBody, eventId, userId) => {
     );
 }
 
+const getHomePageEvents = async () => {
+    const events = await Event
+        .aggregate([
+             {
+                $lookup: {
+                    from: User.collection.name,
+                    localField: "host",
+                    foreignField: "_id",
+                    as: "Host"
+                }
+            },
+            {
+                $unwind: {
+                    path: '$host'
+                }
+            },
+            {
+                $match: {
+                    suspended: false,
+                    published: true
+                }
+            },
+            {
+                $sample: { size: 20 }
+            },
+            {
+                $project: {
+                    title: 1,
+                    host: {
+                        name: '$host.businessDetails.name'
+                    },
+                    type: 1,
+                    category: 1,
+                    location: {
+                        town: 1
+                    },
+                    rating: {
+                        averageScore: 1
+                    },
+                    dates: 1
+                }
+            }
+        ]);
+
+    return events;
+}
+
 module.exports.EventFunctions = {
     generateTickets,
     checkIfDateHasPassed,
     getEventById,
-    saveBookingDetails
+    saveBookingDetails,
+    getHomePageEvents
 } 

@@ -65,6 +65,6 @@ const rateEvent = async (session, opts, requestBody, eventId, userId) => {
 }
 
 module.exports.UserManager = {
-    rateEvent,
+    rateEvent
 };
 

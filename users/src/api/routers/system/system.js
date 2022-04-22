@@ -17,4 +17,17 @@ router
         systemController.getSignedURLAuth
     );
 
+router
+    .route("/getHomePageEvents")
+    .get(
+        systemController.getHomePageEvents
+    );
+    
+router
+    .route("/getAllBanks")
+    .get(
+        systemController.getAllBanks
+    );
+
+
 module.exports = router;
