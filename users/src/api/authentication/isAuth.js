@@ -1,6 +1,6 @@
-const config = require("../../../config"),
-    { User } = require("../models/user"),
-    { AuthFunctions } = require("../functions/auth/authFunctions");
+const config = require("../../../config");
+const { User } = require("../models/user");
+const { AuthFunctions } = require("../functions/auth/authFunctions");
 
 module.exports = async (req, res, next) => {
     try {

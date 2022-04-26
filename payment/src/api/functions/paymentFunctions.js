@@ -6,8 +6,11 @@ const processHostPayment = async () => {
     for (weeklyPayment of weeklyPayments) {
         try {
             let recepientCode = "";
+
+            // Fetch Bank Details from User Microservice
             const payment = await Payment.findOne({ user: weeklyPayment.seller });
 
+            
             const order = await Order.findById(weeklyPayment.order);
 
             if (!payment.recepientCode) {

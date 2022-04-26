@@ -1,5 +1,5 @@
 const { EventFunctions }= require("../../../functions/event/eventFunctions");
-const { PaymentManager } = require("../../../managers/user/user/paymentManager");
+const { PaymentManager } = require("../../../managers/user/regularUser/paymentManager");
 const { Validations } = require("../../../helpers/validations");
 const { RouteResponse } = require("../../../helpers/routeResponse");
 const { StandardResponse } = require("../../../helpers/standardResponse");
@@ -69,6 +69,9 @@ exports.verifyEventPayment = async (req, res) => {
         RouteResponse.OkMessage(eventBankPaymentVerification, res);
     
         await EventFunctions.saveBookingDetails(req.body, req.params.eventId, req.user._id);
+        
+        // Send Message to Payment Microservice to Update the Host's WeeklyPayment Document
+        
     } catch (error) {
         console.log({ error });
 
@@ -77,3 +80,15 @@ exports.verifyEventPayment = async (req, res) => {
         );
     }
 }
+
+// exports.getPaymentDetails = (req, res) => {
+// }
+
+// exports.createPaymentDetails = (req, res) => {
+// }
+
+// exports.addPaymentDetails = (req, res) => {
+// }
+
+// exports.deletePaymentDetails = async (req, res) => {
+// }

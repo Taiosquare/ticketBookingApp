@@ -1,6 +1,6 @@
-const mongoose = require("mongoose"),
-  { ObjectId } = require("mongodb"),
-  Schema = mongoose.Schema;
+const mongoose = require("mongoose");
+const { ObjectId } = require("mongodb");
+const Schema = mongoose.Schema;
 
 const BankDetailsSchema = new Schema(
     {

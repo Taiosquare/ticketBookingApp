@@ -4,6 +4,12 @@ const { HostManager } = require("../../../managers/user/host/hostManager");
 const { startSession } = require("mongoose");
 const { Payment } = require("../../../models/payment");
 
+// exports.getPaymentDetails = (req, res) => {
+// }
+
+// exports.createPaymentDetails = (req, res) => {
+// }
+
 exports.updatePaymentDetails = async (req, res) => {
     res.setHeader('access-token', req.token);
     const session = await startSession();

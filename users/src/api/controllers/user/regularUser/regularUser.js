@@ -1,6 +1,6 @@
 const { Event } = require("../../../models/event");
 const { User } = require("../../../models/user");
-const { UserManager } = require("../../../managers/user/user/userManager");
+const { RegularUserManager } = require("../../../managers/user/regularUser/regularUserManager");
 const mongoose = require("mongoose");
 const { startSession } = require("mongoose");
 const { Validations } = require("../../../helpers/validations");
@@ -100,7 +100,7 @@ exports.rateEvent = async (req, res) => {
         session.startTransaction();
         const opts = { session, new: true };
 
-        const rateEvent = await UserManager.rateEvent(session, opts, req.body, req.params.eventId, req.user._id)
+        const rateEvent = await RegularUserManager.rateEvent(session, opts, req.body, req.params.eventId, req.user._id)
         
         if (rateEvent.status == false) {
             if (rateEvent.serverError == true) {

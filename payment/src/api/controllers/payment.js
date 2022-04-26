@@ -9,6 +9,8 @@ cron.schedule('0 12 * * 6', async function () {
     await PaymentFunctions.processHostPayment();
 });
 
+// Update Weeklypayment Document
+
 // exports.webhookSuccess = async (req, res) => {
 //   try {
 //     const errors = validationResult(req);

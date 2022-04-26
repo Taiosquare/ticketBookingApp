@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const userController = require("../../controllers/user/user/user");
-const paymentController = require("../../controllers/user/user/payment");
+const regularUserController = require("../../controllers/user/regularUser/regularUser");
+const paymentController = require("../../controllers/user/regularUser/payment");
 const { check, param } = require("express-validator");
 const authenticate = require("../../authentication/isAuth");
 
@@ -9,14 +9,14 @@ router
     .route("/searchEvents")
     .get(
         authenticate,
-        userController.searchEvents
+        regularUserController.searchEvents
     );
 
 router
     .route("/rateEvent/:eventId")
     .put(
         authenticate,
-        userController.rateEvent
+        regularUserController.rateEvent
     );
 
 router
@@ -37,14 +37,14 @@ router
     .route("/getEvent/:eventId")
     .get(
         authenticate,
-        userController.getEvent
+        regularUserController.getEvent
     );
 
 router
     .route("/getBookedEvents")
     .get(
         authenticate,
-        userController.getBookedEvents
+        regularUserController.getBookedEvents
     );
     
 // Suspend Account

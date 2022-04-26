@@ -64,7 +64,7 @@ const rateEvent = async (session, opts, requestBody, eventId, userId) => {
     }
 }
 
-module.exports.UserManager = {
+module.exports.RegularUserManager = {
     rateEvent
 };
 
