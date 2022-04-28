@@ -1,6 +1,6 @@
 const { User } = require("../../models/user");
 
-const getUserById = (userId) => {
+const getUserById = async (userId) => {
     return await User.findById(userId);
 }
 

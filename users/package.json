@@ -10,6 +10,7 @@
   "author": "taiosquare",
   "license": "GPL-3.0",
   "dependencies": {
+    "amqplib": "^0.8.0",
     "argon2": "^0.28.5",
     "aws-sdk": "^2.1121.0",
     "body-parser": "^1.20.0",

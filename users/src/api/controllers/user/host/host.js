@@ -263,8 +263,6 @@ exports.getEvent = async (req, res) => {
             }
         ]);
 
-        console.log(event);
-
         RouteResponse.OkMessage(
             StandardResponse.successMessage(null, { event: event[0] }), res
         );

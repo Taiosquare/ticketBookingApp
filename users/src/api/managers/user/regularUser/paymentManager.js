@@ -1,4 +1,5 @@
 const { Event } = require("../../../models/event");
+const { Payment } = require("../../../models/payment");
 const { StandardResponse } = require("../../../helpers/standardResponse");
 const { ApiCall } = require("../../../helpers/apiCall");
 const { EventFunctions } = require("../../../functions/event/eventFunctions");
@@ -78,7 +79,79 @@ const verifyEventPayment = async (requestBody, eventId, userId) => {
     }
 }
 
+const createPaymentDetails = () => {
+    try {
+        const { bankDetails } = req.body;
+
+        const paymentDetails = await Payment.findOne({
+            user: req.user._id
+        });
+
+        if (paymentDetails != null) {
+            return StandardResponse.errorMessage("User Payment Details already created");
+        }
+
+        const newPaymentDetails = await Payment.create({
+            _id: mongoose.Types.ObjectId(),
+            user: req.user._id,
+            bankDetails: [
+                {
+                    accountName: bankDetails.accountName,
+                    email: bankDetails.email,
+                    bank: bankDetails.bank,
+                    birthday: bankDetails.birthday,
+                    phoneNumber: bankDetails.phoneNumber
+                }
+            ],
+        });
+
+        return StandardResponse.successMessage(
+            "Payment Details sucessfully created",
+            { bankDetails: newPaymentDetails.bankDetails[0] }
+        );
+    } catch (error) {
+        return StandardResponse.serverError(error);
+    }
+}
+
+const addPaymentDetails = () => {
+    try {
+        const { bankDetails } = req.body;
+
+        const _id = mongoose.Types.ObjectId();
+
+        await Payment.updateOne(
+            {
+                user: req.user._id,
+            },
+            {
+                $push: {
+                    bankDetails: {
+                        _id: _id,
+                        accountName: bankDetails.accountName,
+                        email: bankDetails.email,
+                        bank: bankDetails.bank,
+                        birthday: bankDetails.birthday,
+                        phoneNumber: bankDetails.phoneNumber
+                    }
+                }
+            }
+        );
+  
+        bankDetails._id = _id; 
+
+        return StandardResponse.successMessage(
+            "Payment Details sucessfully added",
+            { bankDetails: bankDetails }
+        );
+    } catch (error) {
+        return StandardResponse.serverError(error);
+    }
+}
+
 module.exports.PaymentManager = {
     initiateEventPayment,
-    verifyEventPayment
+    verifyEventPayment,
+    createPaymentDetails,
+    addPaymentDetails
 };

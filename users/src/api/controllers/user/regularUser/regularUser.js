@@ -228,4 +228,3 @@ exports.getBookedEvents = async (req, res) => {
 
 
 
-// Cron job for setting the isUsed field on tickets to 'true' after an event ends

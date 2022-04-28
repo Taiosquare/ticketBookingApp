@@ -40,12 +40,12 @@ const func = () => {
 
     const config = require("../config");
   
-    const server = app.listen(config.PORT);
+    const server = app.listen(config.USERS_PORT);
 
     const io = require("./socket").init(server);
 
     io.on("connection", (socket) => {
-        console.log(`Server running on port ${config.PORT}`);
+        console.log(`Server running on port ${config.USERS_PORT}`);
     });
 }
 

@@ -45,7 +45,7 @@ const PaymentSchema = new Schema(
 
         schema_version: {
             type: Number,
-            default: 2,
+            default: 1,
         },
 
         user: {
@@ -57,13 +57,6 @@ const PaymentSchema = new Schema(
             {
                 type: BankDetailsSchema
             },
-        ],
-        
-        webhookPayments: [
-            {
-                type: Schema.Types.ObjectId,
-                ref: "webhook",
-            }
         ],
 
         recepientCode: String,

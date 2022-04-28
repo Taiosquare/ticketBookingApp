@@ -64,6 +64,37 @@ const processHostPayment = async () => {
     }
 }
 
+const updateWeeklyPaymentDoc = () => {
+    // amqp.connect(process.env.AMQP_TEST_URL, function (error0, connection) {
+    //     if (error0) {
+    //         console.log(error0);
+
+    //         throw error0;
+    //     }
+    
+    //     connection.createChannel(function (error1, channel) {
+    //         if (error1) {
+    //             console.log(error1);
+
+    //             throw error1;
+    //         }
+
+    //         const queue1 = 'Order_Created';
+
+    //         channel.assertQueue(queue1, {
+    //             durable: false
+    //         });
+
+    //         channel.consume(queue1, (msg) => {
+    //             const product = JSON.parse(msg.content.toString());
+
+    //             // Code
+    //         }, { noAck: true });
+    //     });
+    // });
+}
+
 module.exports.PaymentFunctions = {
     processHostPayment,
+    updateWeeklyPaymentDoc
 }

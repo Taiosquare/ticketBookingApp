@@ -1,15 +1,12 @@
-// Process Payments
-cron.schedule('00 12 * * 5', async function () {
-    await PaymentFunctions.processHostPayment();
-});
-
-
-// Process payments that might failed the previous day
-cron.schedule('0 12 * * 6', async function () {
-    await PaymentFunctions.processHostPayment();
-});
-
 // Update Weeklypayment Document
+exports.updateWeeklyPaymentDoc = async (req, res) => {
+    try {
+         
+    } catch (error) {
+
+    }
+}
+
 
 // exports.webhookSuccess = async (req, res) => {
 //   try {
@@ -43,3 +40,16 @@ cron.schedule('0 12 * * 6', async function () {
 //     });
 //   }
 // }
+
+// Process Payments
+// cron.schedule('00 12 * * 5', async function () {
+//     await PaymentFunctions.processHostPayment();
+// });
+
+
+// Process payments that might failed the previous day
+// cron.schedule('0 12 * * 6', async function () {
+//     await PaymentFunctions.processHostPayment();
+// });
+
+// Cron job for setting the isUsed field on tickets to 'true' after an event ends

@@ -13,6 +13,7 @@ module.exports = {
   MONGO_URI: process.env.MONGO_URI,
   NODE_ENV: process.env.NODE_ENV,
   PAYSTACK_TEST_SECRET: process.env.PAYSTACK_TEST_SECRET,
-  PORT: process.env.SYSTEM_PORT,
+  PORT: process.env.PAYMENT_PORT,
   REFRESH_SECRET: process.env.REFRESH_SECRET,
+  AMQP_URL: process.env.AMQP_URL
 }
