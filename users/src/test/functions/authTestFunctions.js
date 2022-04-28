@@ -1,6 +1,6 @@
-const request = require('supertest'),
-    { app } = require('../../../app'),
-    { User } = require('../../models/user');
+const request = require('supertest');
+const { app } = require('../../app');
+const { User } = require('../../api/models/user');
 
 const getAdminObject = () => {
     const adminObject = {
@@ -92,7 +92,7 @@ const deleteUser = async (email) => {
     await User.deleteOne({ email: email });
 }
 
-module.exports.TestFunctions = {
+module.exports.AuthTestFunctions = {
     getAdminObject,
     getHostObject, 
     getRegularUserObject,

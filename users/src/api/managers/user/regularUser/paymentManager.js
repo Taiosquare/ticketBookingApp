@@ -79,7 +79,7 @@ const verifyEventPayment = async (requestBody, eventId, userId) => {
     }
 }
 
-const createPaymentDetails = () => {
+const createPaymentDetails = async () => {
     try {
         const { bankDetails } = req.body;
 
@@ -114,7 +114,7 @@ const createPaymentDetails = () => {
     }
 }
 
-const addPaymentDetails = () => {
+const addPaymentDetails = async () => {
     try {
         const { bankDetails } = req.body;
 

@@ -4,7 +4,7 @@ const { HostManager } = require("../../../managers/user/host/hostManager");
 const { startSession } = require("mongoose");
 const { Payment } = require("../../../models/payment");
 
-exports.getPaymentDetails = (req, res) => {
+exports.getPaymentDetails = async (req, res) => {
     res.setHeader('access-token', req.token);
 
     try {
@@ -38,7 +38,7 @@ exports.getPaymentDetails = (req, res) => {
     }
 }
 
-exports.createPaymentDetails = (req, res) => {
+exports.createPaymentDetails = async (req, res) => {
     res.setHeader('access-token', req.token);
 
     try {

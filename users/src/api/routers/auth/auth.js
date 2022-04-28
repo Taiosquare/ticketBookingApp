@@ -73,7 +73,7 @@ router
                         throw new Error("E-Mail Address already registered");
                     }
                 }),
-             check("password")
+            check("password")
                 .notEmpty().withMessage("Password cannot be empty").bail()
                 .isLength({ min: 8 }).withMessage("Password must have at least 8 characters").bail()
                 .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/).withMessage("Password must have at least 1 uppercase, 1 lowercase letter and 1 number"),

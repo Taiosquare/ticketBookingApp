@@ -82,7 +82,7 @@ exports.verifyEventPayment = async (req, res) => {
     }
 }
 
-exports.getPaymentDetails = (req, res) => {
+exports.getPaymentDetails = async (req, res) => {
     res.setHeader('access-token', req.token);
 
     try {
@@ -116,7 +116,7 @@ exports.getPaymentDetails = (req, res) => {
     }
 }
 
-exports.createPaymentDetails = (req, res) => {
+exports.createPaymentDetails = async (req, res) => {
     res.setHeader('access-token', req.token);
 
     try {
@@ -152,7 +152,7 @@ exports.createPaymentDetails = (req, res) => {
     }  
 }
 
-exports.addPaymentDetails = (req, res) => {
+exports.addPaymentDetails = async (req, res) => {
     res.setHeader('access-token', req.token);
 
     try {

@@ -44,7 +44,7 @@ const sendWeeklyPaymentMessage = async (requestBody, eventId, userId) => {
     // });
 }
 
-const getPaymentDetails = (userId) => {
+const getPaymentDetails = async (userId) => {
     return await Payment.findOne({user: userId});
 }
 
