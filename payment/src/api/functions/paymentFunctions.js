@@ -64,34 +64,41 @@ const processHostPayment = async () => {
     }
 }
 
-const updateWeeklyPaymentDoc = () => {
-    // amqp.connect(process.env.AMQP_TEST_URL, function (error0, connection) {
-    //     if (error0) {
-    //         console.log(error0);
+const updateWeeklyPaymentDoc = async (weeklyPaymentObject) => {
+    const hostWeeklyPayment = await WeeklyPayment.findOne(
+        {
+            host: weeklyPaymentObject.host,
+            'event.eventId': weeklyPaymentObject.event.eventId
+        }
+    );
 
-    //         throw error0;
-    //     }
-    
-    //     connection.createChannel(function (error1, channel) {
-    //         if (error1) {
-    //             console.log(error1);
-
-    //             throw error1;
-    //         }
-
-    //         const queue1 = 'Order_Created';
-
-    //         channel.assertQueue(queue1, {
-    //             durable: false
-    //         });
-
-    //         channel.consume(queue1, (msg) => {
-    //             const product = JSON.parse(msg.content.toString());
-
-    //             // Code
-    //         }, { noAck: true });
-    //     });
-    // });
+    if (hostWeeklyPayment == null) {
+        await WeeklyPayment.create({
+            host: weeklyPaymentObject.host,
+            event: weeklyPaymentObject.event,
+            payments: [
+                {
+                    price: weeklyPaymentObject.price,
+                    spacesBooked: weeklyPaymentObject.spacesBooked,
+                }
+            ]
+        });
+    } else {
+        await WeeklyPayment.updateOne(
+            {
+                host: weeklyPaymentObject.host,
+                'event.eventId': weeklyPaymentObject.event.eventId
+            },
+            {
+                $push: {
+                    payments: {
+                        price: weeklyPaymentObject.price,
+                        spacesBooked: weeklyPaymentObject.spacesBooked
+                    }
+                }
+            }
+        );
+    }
 }
 
 module.exports.PaymentFunctions = {

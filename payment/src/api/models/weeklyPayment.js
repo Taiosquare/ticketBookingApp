@@ -2,6 +2,9 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const { ObjectId } = require("mongodb");
 
+// The document will be deleted after the all the payments have been made
+// & the event date has passed
+
 const WeeklyPaymentSchema = new Schema(
     {
         _id: {
@@ -15,30 +18,45 @@ const WeeklyPaymentSchema = new Schema(
         },
 
         host: {
-            hostId: {
-                type: Schema.Types.ObjectId,
-            },
-
-            hostName: {
-                type: String,
-                required: true
-            }
+            type: Schema.Types.ObjectId
         },
+
+        // host: {
+        //     hostId: {
+        //         type: Schema.Types.ObjectId,
+        //     },
+
+        //     hostName: {
+        //         type: String,
+        //         required: true
+        //     }
+        // },
 
         event: {
             eventId: {
                 type: Schema.Types.ObjectId,
             },
 
-            eventName: {
+            eventTitle: {
                 type: String,
                 required: true
+            },
+
+            ticketsAvailable: {
+                start: {
+                    type: Date,
+                    required: true
+                },
+                end: {
+                    type: Date,
+                    required: true
+                }
             }
         },
 
         payments: [
             {
-                amount: {
+                price: {
                     type: Number,
                     required: true
                 },

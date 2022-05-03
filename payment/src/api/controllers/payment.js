@@ -1,11 +1,35 @@
-// Update Weeklypayment Document
-exports.updateWeeklyPaymentDoc = async (req, res) => {
-    try {
-         
-    } catch (error) {
+const amqp = require('amqplib/callback_api');
+const config = require('../../../config');
+const { PaymentFunctions } = require('../functions/paymentFunctions');
 
+
+amqp.connect(config.AMQP_URL, function (error0, connection) {
+    if (error0) {
+        console.log(error0);
+
+        throw error0;
     }
-}
+
+    connection.createChannel(function (error1, channel) {
+        if (error1) {
+            console.log(error1);
+
+            throw error1;
+        }
+
+        const queue1 = 'Order_Created';
+
+        channel.assertQueue(queue1, {
+            durable: false
+        });
+
+        channel.consume(queue1, (msg) => {
+            const weeklyPaymentObject = JSON.parse(msg.content.toString());
+
+            PaymentFunctions.updateWeeklyPaymentDoc(weeklyPaymentObject);
+        }, { noAck: true });
+    });
+});
 
 
 // exports.webhookSuccess = async (req, res) => {

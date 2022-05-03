@@ -4,44 +4,46 @@ const { User } = require('../../models/user');
 const { EventFunctions } = require('../../functions/event/eventFunctions');
 const { UserFunctions } = require('../../functions/user/userFunctions');
 
-const sendWeeklyPaymentMessage = async (requestBody, eventId, userId) => {
-    // await cannot work here
-
-    // amqp.connect(config.AMQP_URL, function (error0, connection) {
-    //     if (error0) {
-    //         console.log(error0);
-            
-    //         throw error0;
-    //     }
+const sendWeeklyPaymentMessage = async (requestBody, eventId) => {
+    const event = await EventFunctions.getEventById(eventId);
     
-    //     connection.createChannel(function (error1, channel) {
-    //         if (error1) {
-    //             console.log(error1);
+    const weeklyPaymentObject = {
+        host: event.host,
+        event: {
+            eventId: event._id,
+            eventTitle: event.title,
+            ticketsAvailable: {
+                start: events.tickets.datesAvailable.start,
+                end:  events.tickets.datesAvailable.start
+            }
+        }, 
+        price: events.tickets.price,
+        spacesBooked: requestBody.spacesBooked
+    };
 
-    //             throw error1;
-    //         }
-
-    //         const queue1 = 'Order_Created';
-
-    //         channel.assertQueue(queue1, {
-    //             durable: false
-    //         });
-
-    //         const host = await UserFunctions.getUserById(userId);
-
-    //         const event = await EventFunctions.getEventById(eventId);
-   
-    //         reconfigure the weeklyPaymentSchema 
-    //         const weeklyPaymentObject = {
-    //             host: {
-    //                 hostId
-    //             }
-    //         };
+    amqp.connect(config.AMQP_URL, function (error0, connection) {
+        if (error0) {
+            console.log(error0);
             
-            
-    //         channel.sendToQueue(queue1, Buffer.from(JSON.stringify(weeklyPaymentObject)));
-    //     });
-    // });
+            throw error0;
+        }
+    
+        connection.createChannel(function (error1, channel) {
+            if (error1) {
+                console.log(error1);
+
+                throw error1;
+            }
+
+            const queue1 = 'Order_Created';
+
+            channel.assertQueue(queue1, {
+                durable: false
+            });
+          
+            channel.sendToQueue(queue1, Buffer.from(JSON.stringify(weeklyPaymentObject)));
+        });
+    });
 }
 
 const getPaymentDetails = async (userId) => {
