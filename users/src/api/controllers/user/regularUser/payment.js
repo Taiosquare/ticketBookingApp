@@ -68,11 +68,17 @@ exports.verifyEventPayment = async (req, res) => {
             return RouteResponse.badRequest(eventBankPaymentVerification, res);
         } 
 
+        // eventBankPaymentVerification.data = null;
         RouteResponse.OkMessage(eventBankPaymentVerification, res);
     
+        // Add to a Queue
         await EventFunctions.saveBookingDetails(req.body, req.params.eventId, req.user._id);
         
+        // Add to a Queue
         await PaymentFunctions.sendWeeklyPaymentMessage(req.body, req.params.eventId, req.user._id);
+
+        // Add to a Queue
+        // await EventFunctions.sendTicketsToUsers(eventBankPaymentVerification.data); 
     } catch (error) {
         console.log({ error });
 

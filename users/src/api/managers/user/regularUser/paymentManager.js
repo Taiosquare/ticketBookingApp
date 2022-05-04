@@ -66,10 +66,11 @@ const verifyEventPayment = async (requestBody, eventId, userId) => {
         );
 
         if (response.status == true) {
-            await EventFunctions.generateTickets(event, spacesBooked, reference, userId);
+            const tickets = await EventFunctions.generateTickets(event, spacesBooked, reference, userId);
 
             return StandardResponse.successMessage(
-                'Payment has successfully been verified.'
+                'Payment has successfully been verified.',
+                tickets
             );
         } else {
             return StandardResponse.errorMessage("The Payment could not be verified, please try again.");

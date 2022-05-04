@@ -42,10 +42,7 @@ const generateTickets = async (event, spacesBooked, reference, userId) => {
         tickets.push(ticket);
     }
 
-    // Convert the tickets array into a Document and add it as an attachment
-    // or upload the doc to S3 & include the link in the email
-
-    // const user = await UserFunctions.getUserById(req.user._id);
+    return tickets;
 }
 
 const checkIfDateHasPassed = (eventDate) => {
@@ -139,10 +136,58 @@ const getHomePageEvents = async () => {
     return events;
 }
 
+const sendTicketsToUsers = async (tickets) => {
+    // for (ticket of tickets) {
+    //     const documentName = `Ticket ${ticket.ticketID}.pdf`;
+
+    //     const pdfDoc = new PDFDocument();
+    //     res.setHeader("Content-Type", "application/pdf");
+    //     res.setHeader("Content-Disposition", `inline; filename=${invoiceName}`);
+    //     pdfDoc.pipe(res);
+
+    //     pdfDoc.fontSize(14).text("NOGASA MEMBERS’ NAMES, CODES & COMPANIES", {
+    //         underline: true,
+    //     });
+
+    //     members.forEach(myFunction);
+
+    //     function myFunction(item, index) {
+    //     pdfDoc
+    //         .fontSize(11)
+    //         // .text(``)
+    //         .text(`${index + 1}.) Name:  ${item.name}`, { align: "left" })
+    //         .text(`     Code:  ${item.code}`, { align: "left" })
+    //         .text(`     Companies:  ${item.company}`, { align: "left" })
+    //         .text(
+    //         "----------------------------------------------------------------------------------------------------------------------------"
+    //         );
+    //     }
+
+    //     pdfDoc.end();
+    // }
+    
+
+    // // Research how to attach PDF to email
+    // const from = `Energy Direct energydirect@outlook.com`,
+    //     to = user.email,
+    //     subject = `Account Password Reset`,
+    //     html = `<p>Good Day ${user.firstname},</p><p>Please click this <a href="${baseurl}/login?reset-password=${token}"> link</a> to reset your password.</p>`;
+
+    // const data = {
+    //     from: from,
+    //     to: to,
+    //     subject: subject,
+    //     html: html,
+    //     attachments: 
+    // };
+
+    // await mailer.sendEmail(data);
+}
 module.exports.EventFunctions = {
     generateTickets,
     checkIfDateHasPassed,
     getEventById,
     saveBookingDetails,
-    getHomePageEvents
+    getHomePageEvents,
+    sendTicketsToUsers
 } 

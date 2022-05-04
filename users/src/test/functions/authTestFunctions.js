@@ -1,5 +1,5 @@
 const request = require('supertest');
-const { app } = require('../../app');
+const { app, server } = require('../../app');
 const { User } = require('../../api/models/user');
 
 const getAdminObject = () => {
