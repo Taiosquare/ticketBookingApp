@@ -8,6 +8,9 @@ router
     .route("/approveHost/:hostId")
     .put(
         authenticate,
+        [
+            param("hostId", "Invalid hostId Type").isMongoId(),
+        ],
         adminController.approveHost
     );
   
@@ -15,21 +18,30 @@ router
     .route("/suspendHost/:hostId")
     .put(
         authenticate,
-        adminController.suspendHost
+        [
+            check("status")
+                .notEmpty().withMessage("User Suspension Status cannot be empty").bail()
+                .isBoolean().withMessage("User Suspension Status should be a Boolean"),
+            param("hostId", "Invalid hostId Type").isMongoId(),
+        ],
+        adminController.setHostSuspensionStatus
     );
   
 router
-    .route("/getUser/:userId")
+    .route("/viewRegularUser/:userId")
     .get(
         authenticate,
-        adminController.getUser
+        [
+            param("userId", "Invalid userId Type").isMongoId(),
+        ],
+        adminController.viewRegularUser
     );
 
 router
-    .route("/getUsers")
+    .route("/viewRegularUsers")
     .get(
         authenticate,
-        adminController.getUsers
+        adminController.viewRegularUsers
     );
     
 router

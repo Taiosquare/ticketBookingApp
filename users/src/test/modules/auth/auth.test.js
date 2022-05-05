@@ -30,7 +30,7 @@ describe("User Creation/Registration", () => {
         });
 
         beforeEach(async () => {
-            await AuthTestFunctions.deleteUser("eronoiak@gmail.com");
+            await UserTestFunctions.deleteUser("eronoiak@gmail.com");
         });
         
         test("response status code is 201 if user is added successfully", async () => {
@@ -151,7 +151,7 @@ describe("User Creation/Registration", () => {
         let hostObject = UserTestFunctions.getHostObject();
 
         beforeEach(async () => {
-            await AuthTestFunctions.deleteUser("kutupa123@protonmail.com");
+            await UserTestFunctions.deleteUser("kutupa123@protonmail.com");
         });
 
         test("response status code is 201 if host is registered successfully", async () => {
@@ -315,7 +315,7 @@ describe("User Creation/Registration", () => {
         let regularUserObject = UserTestFunctions.getRegularUserObject();
 
         beforeEach(async () => {
-            await AuthTestFunctions.deleteUser("vikkyjoe5@gmail.com");
+            await UserTestFunctions.deleteUser("vikkyjoe5@gmail.com");
         });
 
         test("response status code is 201 if user is added successfully", async () => {

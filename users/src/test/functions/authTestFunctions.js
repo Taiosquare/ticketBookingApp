@@ -1,6 +1,5 @@
 const request = require('supertest');
 const { app, server } = require('../../app');
-const { User } = require('../../api/models/user');
 
 const createAdmin = async (user, accessToken, refreshToken) => {
     const response = await request(app)
@@ -33,13 +32,8 @@ const loginUser = async (email, password) => {
     return response;
 }
 
-const deleteUser = async (email) => {
-    await User.deleteOne({ email: email });
-}
-
 module.exports.AuthTestFunctions = {
     createAdmin,
     registerUser,
     loginUser,
-    deleteUser
 }

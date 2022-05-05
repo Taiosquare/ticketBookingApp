@@ -1,5 +1,6 @@
 const request = require('supertest');
 const { app, server } = require('../../app');
+const { User } = require('../../api/models/user');
 
 const getAdminObject = () => {
     const adminObject = {
@@ -56,23 +57,23 @@ const getRegularUserObject = () => {
     return regularUserObject;
 }
 
-const createUser = (user) => {
+const getUser = async (userId, accessToken, refreshToken) => {
     const response = await request(app)
-        .post("/auth/register")
-        .set('baseurl', 'http://localhost:5000')
-        .send(user);
+        .get(`/admin/viewRegularUser/${userId}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .set('refresh-token', refreshToken);
 
     return response;
 }
 
-const approveUser = () => {
-    
+const deleteUser = async (email) => {
+    await User.deleteOne({ email: email });
 }
 
 module.exports.UserTestFunctions = {
     getAdminObject,
     getHostObject,
     getRegularUserObject,
-    createUser,
-    approveUser, 
+    getUser,
+    deleteUser
 }

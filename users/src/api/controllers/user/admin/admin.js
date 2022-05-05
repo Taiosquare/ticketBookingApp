@@ -44,7 +44,7 @@ exports.approveHost = async (req, res) => {
     }
 }
 
-exports.suspendHost = async (req, res) => {
+exports.setHostSuspensionStatus = async (req, res) => {
     res.setHeader('access-token', req.token);
     const session = await startSession();
     
@@ -65,6 +65,7 @@ exports.suspendHost = async (req, res) => {
         const opts = { session, new: true };
 
         const { hostId } = req.params;
+        const { status } = req.body;
         
         await User.updateOne(
             {
@@ -73,7 +74,7 @@ exports.suspendHost = async (req, res) => {
             [
                 {
                     $set: {
-                        accountSuspended: true
+                        accountSuspended: status
                     }
                 }
             ],
@@ -84,7 +85,7 @@ exports.suspendHost = async (req, res) => {
         session.endSession();
 
         RouteResponse.OkMessage(
-            StandardResponse.successMessage("Host Suspended Successfully."), res
+            StandardResponse.successMessage("Host Suspension Status Successfully set."), res
         );
     } catch (error) {
         console.log({ error });
@@ -93,7 +94,7 @@ exports.suspendHost = async (req, res) => {
         session.endSession();
 
         RouteResponse.internalServerError(
-            StandardResponse.serverError("Host Suspension Failed, please try again."), res
+            StandardResponse.serverError("Host Suspension Status Failed to set, please try again."), res
         );
     }
 }

@@ -1,9 +1,13 @@
 const request = require('supertest');
 const { app, server } = require('../../../../app');
 const { User } = require('../../../../api/models/user');
-const { UserTestFunctions } = require('../../functions/userTestFunctions');
+const { UserTestFunctions } = require('../../../functions/userTestFunctions');
+const { AuthTestFunctions } = require('../../../functions/authTestFunctions');
+const { AdminTestFunctions } = require('../../../functions/adminTestFunctions')
 
-let accessToken = "", refreshToken = "", userId = "";
+let accessToken = "";
+let refreshToken = "";
+let userId = "";
 
 afterAll(async () => {
     await server.close();
@@ -26,92 +30,76 @@ describe("Admin Operations", () => {
         await server.close();
     });
 
-    describe("Get User Vehicles", () => {
-        test("response status code is 200 if vehicles are returned successfully", async () => {
-            const response = await TestFunctions.getVehicles("6122ad2e1758bc1b788ffe60");
+    describe("View Hosts", () => {
 
-            expect(response.statusCode).toBe(200);
-        });
-
-        test("response body object has the correct fields", async () => {
-            const response = await TestFunctions.getVehicles("6122ad2e1758bc1b788ffe60");
-
-            expect(response.body.vehicles[0]).toHaveProperty('vehicleName');
-            expect(response.body.vehicles[0]).toHaveProperty('vehicleNumber');
-            expect(response.body.vehicles[0]).toHaveProperty('driverName');
-            expect(response.body.vehicles[0]).toHaveProperty('driverContact');
-        });
-
-        const userId_mongoId = "Invalid userId Type";
-
-        it.each`
-            value                   | expectedMessage
-            ${'test'}               | ${userId_mongoId}
-            ${12}                   | ${userId_mongoId}
-            ${true}                 | ${userId_mongoId}
-        `('returns $expectedMessage when $value is sent as userId', async ({ value, expectedMessage }) => {
-            const response = await TestFunctions.getVehicles(value);
-
-            const body = response.body;
-            expect(body.errors).toContain(expectedMessage);
-        });
     });
 
-    describe("Get Users", () => {
-        const userObject = TestFunctions.getUserObject();
+    describe("View Host", () => {
+
+    });
+
+    describe("View Admins", () => {
+
+    });
+
+    describe("View Admin", () => {
+
+    });
+        
+    describe("View Regular Users", () => {
+        const regularUserObject = UserTestFunctions.getRegularUserObject();
 
         beforeAll(async () => {
-            await TestFunctions.postUser(userObject);
+            await AuthTestFunctions.registerUser(regularUserObject);
         });
 
         afterAll(async () => {
-            await TestFunctions.deleteUser("jiggybaby@gmail.com");
+            await UserTestFunctions.deleteUser("vikkyjoe5@gmail.com");
         });
         
         test("response status code is 200 if users are returned successfully", async () => {
-            const response = await TestFunctions.getUsers();
+            const response = await UserTestFunctions.getUsers(accessToken, refreshToken);
 
             expect(response.statusCode).toBe(200);
         });
 
         test("response body object has the correct fields", async () => {
-            const response = await TestFunctions.getUsers();
+            const response = await UserTestFunctions.getUsers(accessToken, refreshToken);
 
-            expect(response.body.users[0]).toHaveProperty('username');
-            expect(response.body.users[0]).toHaveProperty('firstname');
-            expect(response.body.users[0]).toHaveProperty('lastname');
-            expect(response.body.users[0]).toHaveProperty('email');
-            expect(response.body.users[0]).toHaveProperty('phoneNumber');
-            expect(response.body.users[0]).toHaveProperty('businessDetails');
+            expect(response.body.data.users[0]).toHaveProperty('username');
+            expect(response.body.data.users[0]).toHaveProperty('firstname');
+            expect(response.body.data.users[0]).toHaveProperty('lastname');
+            expect(response.body.data.users[0]).toHaveProperty('email');
+            expect(response.body.data.users[0]).toHaveProperty('createdAt');
+            expect(response.body.data.users[0]).toHaveProperty('updatedAt');
         });
     });
 
-    describe("Get User", () => {
+    describe("View Regular User", () => {
         afterEach(async () => {
-            await TestFunctions.deleteUser("jiggybaby@gmail.com");
+            await UserTestFunctions.deleteUser("vikkyjoe5@gmail.com");
         });
 
-        const userObject = TestFunctions.getUserObject();
+        const regularUserObject = UserTestFunctions.getRegularUserObject();
 
         test("response status code is 200 if user is returned successfully", async () => {
-            const response = await TestFunctions.postUser(userObject);
+            const response = await AuthTestFunctions.registerUser(regularUserObject);
 
-            const userResponse = await TestFunctions.getUser(response.body.user._id);
+            const user = await UserTestFunctions.getUser(response.body.user._id, accessToken, refreshToken);
 
-            expect(userResponse.statusCode).toBe(200);
+            expect(user.statusCode).toBe(200);
         });
 
         test("response body object has the correct values", async () => {
-            const response = await TestFunctions.postUser(userObject);
+            const response = await AuthTestFunctions.registerUser(regularUserObject);
 
-            const userResponse = await TestFunctions.getUser(response.body.user._id);
+            const user = await UserTestFunctions.getUser(response.body.user._id, accessToken, refreshToken);
 
-            expect(userResponse.body.user.username).toBe('JiggyBaby');
-            expect(userResponse.body.user.firstname).toBe('Joshua');
-            expect(userResponse.body.user.lastname).toBe('Osaigbovo');
-            expect(userResponse.body.user.email).toBe('jiggybaby@gmail.com');
-            expect(userResponse.body.user.phoneNumber).toBe('09089089078');
-            expect(userResponse.body.user.businessDetails.companyName).toBe('Divine Oil Transporters');
+            expect(user.body.data.user.username).toBe('Taiosquare');
+            expect(user.body.data.user.firstname).toBe('Joshua');
+            expect(user.body.data.user.lastname).toBe('Osaigbovo');
+            expect(user.body.data.user.email).toBe('vikkyjoe5@gmail.com');
+            expect(user.body.data.user.role).toBe('regularUser');
         });
 
         const userId_mongoId = "Invalid userId Type";
@@ -122,68 +110,64 @@ describe("Admin Operations", () => {
             ${12}                   | ${userId_mongoId}
             ${true}                 | ${userId_mongoId}
         `('returns $expectedMessage when $value is sent as userId', async ({ value, expectedMessage }) => {
-            const response = await TestFunctions.getUser(value);
+            const user = await UserTestFunctions.getUser(value, accessToken, refreshToken);
 
-            const body = response.body;
+            const body = user.body;
             expect(body.errors).toContain(expectedMessage);
         });
     });
 
     describe("Approve Host", () => {
-        const hostObject = TestFunctions.getUserObject();
-
-        beforeEach(async () => {
-            const response = await postUser(hostObject);
- 
-            userId = response.body.user._id;
-        });
+        const hostObject = UserTestFunctions.getHostObject();
 
         afterEach(async () => {
-            await TestFunctions.deleteUser("jiggybaby@gmail.com");
+            await UserTestFunctions.deleteUser("kutupa123@protonmail.com");
         });
 
         test("response status code is 200 if user is approved successfully", async () => {
-            const response2 = await TestFunctions.approveUser(user);
+            const user = await AuthTestFunctions.registerUser(hostObject);
 
-            expect(response2.statusCode).toBe(200);
+            const response = await AdminTestFunctions.approveUser(user.body.user._id, accessToken, refreshToken);
+
+            expect(response.statusCode).toBe(200);
         });
 
         test("response body has a success message if user is approved successfully", async () => {
-            const response = await TestFunctions.postUser(userObject);
+            const user = await AuthTestFunctions.registerUser(hostObject);
 
-            const response2 = await TestFunctions.approveUser(response.body.user._id);
+            const response = await AdminTestFunctions.approveUser(user.body.user._id, accessToken, refreshToken);
 
-            expect(response2.body.message).toEqual("User Approved Successfully.");
+            expect(response.body.message).toEqual("Host Approved Successfully.");
         });
 
         test("response body has a user object if user is approved successfully", async () => {
-            const response = await TestFunctions.postUser(userObject);
+            const user = await AuthTestFunctions.registerUser(hostObject);
 
-            const response2 = await TestFunctions.approveUser(response.body.user._id);
+            const response = await AdminTestFunctions.approveUser(user.body.user._id, accessToken, refreshToken);
 
-            expect(response2.body.user).toHaveProperty("name");
-            expect(response2.body.user).toHaveProperty("email");
+            expect(response.body.user).toHaveProperty("name");
+            expect(response.body.user).toHaveProperty("email");
         });
 
         test("Account approval status was set to true in the database", async () => {
-            const response = await TestFunctions.postUser(userObject);
+            const response = await AuthTestFunctions.registerUser(hostObject);
 
-            await TestFunctions.approveUser(response.body.user._id);
+            await AdminTestFunctions.approveUser(response.body.user._id, accessToken, refreshToken);
 
             const user = await User.findById(response.body.user._id);
 
             expect(user.accountApproved).toBe(true);
         });
 
-        const userId_mongoId = "Invalid userId Type";
+        const hostId_mongoId = "Invalid hostId Type";
 
         it.each`
             value                   | expectedMessage
-            ${'test'}               | ${userId_mongoId}
-            ${12}                   | ${userId_mongoId}
-            ${true}                 | ${userId_mongoId}
+            ${'test'}               | ${hostId_mongoId}
+            ${12}                   | ${hostId_mongoId}
+            ${true}                 | ${hostId_mongoId}
         `('returns $expectedMessage when $value is sent as userId', async ({ value, expectedMessage }) => {
-            const response = await TestFunctions.approveUser(value);
+            const response = await AdminTestFunctions.approveUser(value);
 
             const body = response.body;
 
@@ -191,64 +175,77 @@ describe("Admin Operations", () => {
         });
     });
 
-    describe("Suspend User", () => {
+    describe("Set Host Suspension Status", () => {
         afterEach(async () => {
             await TestFunctions.deleteUser("jiggybaby@gmail.com");
         });
 
-        const userObject = TestFunctions.getUserObject();
+        const hostObject = UserTestFunctions.getHostObject();
 
-        let reqBody = {
+        let requestBody = {
             status: true
         }
 
-        test("response status code is 200 if user is suspended successfully", async () => {
-            const response = await TestFunctions.postUser(userObject);
+        test("response status code is 200 if host suspension status is successfully set", async () => {
+            const user = await AuthTestFunctions.registerUser(hostObject);
 
-            const response2 = await TestFunctions.suspendUser(response.body.user._id, reqBody);
+            const response = await AdminTestFunctions.setUserSuspensionStatus(
+                user.body.user._id,
+                requestBody,
+                accessToken,
+                refreshToken
+            );
 
-            expect(response2.statusCode).toBe(200);
+            expect(response.statusCode).toBe(200);
         });
 
-        test("response body has a success message if user is suspended successfully", async () => {
-            const response = await TestFunctions.postUser(userObject);
+        test("response body has a success message if host suspension status is successfully set", async () => {
+            const user = await AuthTestFunctions.registerUser(hostObject);
 
-            const response2 = await TestFunctions.suspendUser(response.body.user._id, reqBody);
+            const response = await AdminTestFunctions.setUserSuspensionStatus(
+                user.body.user._id,
+                requestBody,
+                accessToken,
+                refreshToken
+            );
 
-            expect(response2.body.message).toEqual("User Suspension Status Successfully set.");
+            expect(response.body.message).toEqual("Host Suspension Status Successfully set.");
         });
 
-        test("User suspension status was set to true in the database", async () => {
-            const response = await TestFunctions.postUser(userObject);
+        test("Host suspension status was set to true in the database", async () => {
+            const user = await AuthTestFunctions.registerUser(hostObject);
 
-            await TestFunctions.suspendUser(response.body.user._id, reqBody);
-
-            const user = await User.findById(response.body.user._id);
+            await AdminTestFunctions.setUserSuspensionStatus(
+                user.body.user._id,
+                requestBody,
+                accessToken,
+                refreshToken
+            );
 
             expect(user.accountSuspended).toBe(true);
         });
 
-        const status_empty = "User Suspension Status cannot be empty";
-        const status_boolean = "User Suspension Status should be a Boolean";
-        const userId_mongoId = "Invalid userId Type";
+        const status_empty = "Host Suspension Status cannot be empty";
+        const status_boolean = "Host Suspension Status should be a Boolean";
+        const hostId_mongoId = "Invalid hostId Type";
 
         it.each`
             status       | userId                         | expectedMessage
             ${null}      | ${""}                          | ${status_empty}
             ${12}        | ${""}                          | ${status_boolean}
             ${"String"}  | ${""}                          | ${status_boolean}
-            ${true}      | ${"String"}                    | ${userId_mongoId}
-            ${true}      | ${12}                          | ${userId_mongoId}
+            ${true}      | ${"String"}                    | ${hostId_mongoId}
+            ${true}      | ${12}                          | ${hostId_mongoId}
         `('returns $expectedMessage when $status is sent as status, and $userId is sent as userId', async ({ status, userId, expectedMessage }) => {
-            const response = await TestFunctions.postUser(userObject);
+            const user = await AuthTestFunctions.registerUser(hostObject);
             
-            reqBody.status = status;
+            requestBody.status = status;
             
-            userId = (userId == "") ? response.body.user._id : userId;
+            userId = (userId == "") ? user.body.user._id : userId;
 
-            const response2 = await TestFunctions.suspendUser(userId, reqBody);
+            const response = await AdminTestFunctions.setHostSuspensionStatus(userId, requestBody);
 
-            expect(response2.body.errors).toContain(expectedMessage);
+            expect(response.body.errors).toContain(expectedMessage);
         });
     });
 });
