@@ -73,12 +73,12 @@ exports.verifyEventPayment = async (req, res) => {
     
         // Add to a Queue
         await EventFunctions.saveBookingDetails(req.body, req.params.eventId, req.user._id);
-        
+
         // Add to a Queue
         await PaymentFunctions.sendWeeklyPaymentMessage(req.body, req.params.eventId, req.user._id);
 
         // Add to a Queue
-        // await EventFunctions.sendTicketsToUsers(eventBankPaymentVerification.data); 
+        await EventFunctions.sendTicketsToUsers(eventBankPaymentVerification.data); 
     } catch (error) {
         console.log({ error });
 

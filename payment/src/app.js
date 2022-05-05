@@ -8,6 +8,8 @@ const api = require("./api/api");
 const config = require("../../users/config");
 const errorController = require("./api/controllers/error");
 
+require("./db/mongoose.js");
+
 app.use(helmet());
 app.use(compression());
 

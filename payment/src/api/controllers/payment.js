@@ -26,6 +26,8 @@ amqp.connect(config.AMQP_URL, function (error0, connection) {
         channel.consume(queue1, (msg) => {
             const weeklyPaymentObject = JSON.parse(msg.content.toString());
 
+            console.log(weeklyPaymentObject);
+            
             PaymentFunctions.updateWeeklyPaymentDoc(weeklyPaymentObject);
         }, { noAck: true });
     });

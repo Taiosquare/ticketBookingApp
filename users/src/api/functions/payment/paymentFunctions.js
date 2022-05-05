@@ -13,11 +13,11 @@ const sendWeeklyPaymentMessage = async (requestBody, eventId) => {
             eventId: event._id,
             eventTitle: event.title,
             ticketsAvailable: {
-                start: events.tickets.datesAvailable.start,
-                end:  events.tickets.datesAvailable.start
+                start: event.tickets.datesAvailable.start,
+                end:  event.tickets.datesAvailable.start
             }
         }, 
-        price: events.tickets.price,
+        price: event.tickets.price,
         spacesBooked: requestBody.spacesBooked
     };
 
@@ -27,6 +27,8 @@ const sendWeeklyPaymentMessage = async (requestBody, eventId) => {
             
             throw error0;
         }
+
+        console.log(weeklyPaymentObject);
     
         connection.createChannel(function (error1, channel) {
             if (error1) {

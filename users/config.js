@@ -18,7 +18,7 @@ module.exports = {
   MONGO_URI: process.env.MONGO_URI,
   NODE_ENV: process.env.NODE_ENV,
   PAYSTACK_TEST_SECRET: process.env.PAYSTACK_TEST_SECRET,
-  PORT: process.env.USERS_PORT,
+  USERS_PORT: process.env.USERS_PORT,
   REFRESH_SECRET: process.env.REFRESH_SECRET,
   S3_ACCESS_KEY: process.env.S3_ACCESS_KEY,
   S3_SECRET_KEY: process.env.S3_SECRET_KEY,

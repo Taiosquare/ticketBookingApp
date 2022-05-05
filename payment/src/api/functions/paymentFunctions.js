@@ -1,4 +1,5 @@
 const { WeeklyPayment } = require("../models/weeklyPayment");
+const mongoose = require("mongoose");
 
 const processHostPayment = async () => {
     const weeklyPayments = await WeeklyPayment.find();
@@ -73,9 +74,20 @@ const updateWeeklyPaymentDoc = async (weeklyPaymentObject) => {
     );
 
     if (hostWeeklyPayment == null) {
+        const hostId = mongoose.Types.ObjectId(weeklyPaymentObject.host);
+        const eventId = mongoose.Types.ObjectId(weeklyPaymentObject.event.eventId);
+
         await WeeklyPayment.create({
-            host: weeklyPaymentObject.host,
-            event: weeklyPaymentObject.event,
+            _id: mongoose.Types.ObjectId(),
+            host: hostId,
+            event: {
+                eventId: eventId,
+                eventTitle: weeklyPaymentObject.event.eventTitle,
+                ticketsAvailable: {
+                    start: weeklyPaymentObject.event.ticketsAvailable.start,
+                    end: weeklyPaymentObject.event.ticketsAvailable.end
+                }
+            },
             payments: [
                 {
                     price: weeklyPaymentObject.price,

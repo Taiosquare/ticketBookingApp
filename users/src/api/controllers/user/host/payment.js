@@ -125,23 +125,13 @@ exports.updatePaymentDetails = async (req, res) => {
             return RouteResponse.validationError(payloadValidation, res);
         }
 
-        let account = await Account.findOne({ host: req.user._id });
+        const createPaymentDetails = await PaymentManager.createPaymentDetails(req.body, req.user._id);
 
-        req.body.accountName && (account.accountName = req.body.accountName);
-        req.body.accountNumber && (account.accountNumber = req.body.accountNumber);
-        req.body.bank && (account.bank = req.body.bank);
+        if (createPaymentDetails.status == false) {
+            throw createPaymentDetails.error;
+        } 
 
-        const result = await account.save();
-
-        res.status(200).json({
-            message: "Account Details Updated Successfully",
-            account: {
-                _id: result._id,
-                accountName: result.accountName,
-                accountNumber: result.accountNumber,
-                bank: result.bank,
-            },
-        });
+        RouteResponse.OkMessage200(createPaymentDetails, res);
     } catch (error) {
         console.log({ error });
 

@@ -1,8 +1,13 @@
 const { app, server } = require('../../../app');
 const { User } = require('../../../api/models/user');
 const { AuthTestFunctions } = require('../../functions/authTestFunctions');
+const { UserTestFunctions } = require('../../functions/userTestFunctions');
 
 let accessToken = "", refreshToken = "";
+
+afterAll(async () => {
+    await server.close();
+});
 
 jest.setTimeout(90000);
 
@@ -12,7 +17,7 @@ describe("User Creation/Registration", () => {
     });
 
     describe("Admin Creation", () => {
-        let adminObject = AuthTestFunctions.getAdminObject();
+        let adminObject = UserTestFunctions.getAdminObject();
 
         beforeAll(async () => {       
             const response = await AuthTestFunctions.loginUser(
@@ -143,7 +148,7 @@ describe("User Creation/Registration", () => {
     });
 
     describe("Host Registration", () => {
-        let hostObject = AuthTestFunctions.getHostObject();
+        let hostObject = UserTestFunctions.getHostObject();
 
         beforeEach(async () => {
             await AuthTestFunctions.deleteUser("kutupa123@protonmail.com");
@@ -307,7 +312,7 @@ describe("User Creation/Registration", () => {
     });
 
     describe("Regular User Registration", () => {
-        let regularUserObject = AuthTestFunctions.getRegularUserObject();
+        let regularUserObject = UserTestFunctions.getRegularUserObject();
 
         beforeEach(async () => {
             await AuthTestFunctions.deleteUser("vikkyjoe5@gmail.com");

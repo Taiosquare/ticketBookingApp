@@ -21,17 +21,6 @@ const WeeklyPaymentSchema = new Schema(
             type: Schema.Types.ObjectId
         },
 
-        // host: {
-        //     hostId: {
-        //         type: Schema.Types.ObjectId,
-        //     },
-
-        //     hostName: {
-        //         type: String,
-        //         required: true
-        //     }
-        // },
-
         event: {
             eventId: {
                 type: Schema.Types.ObjectId,
