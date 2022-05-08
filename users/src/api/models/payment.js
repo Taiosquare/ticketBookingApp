@@ -59,7 +59,7 @@ const PaymentSchema = new Schema(
             },
         ],
 
-        recepientCode: String,
+        recipientCode: String,
     },
     {
         autoCreate: true,

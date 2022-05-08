@@ -27,8 +27,6 @@ const sendWeeklyPaymentMessage = async (requestBody, eventId) => {
             
             throw error0;
         }
-
-        console.log(weeklyPaymentObject);
     
         connection.createChannel(function (error1, channel) {
             if (error1) {
@@ -37,7 +35,7 @@ const sendWeeklyPaymentMessage = async (requestBody, eventId) => {
                 throw error1;
             }
 
-            const queue1 = 'Order_Created';
+            const queue1 = 'Send_Weekly_Payment';
 
             channel.assertQueue(queue1, {
                 durable: false
@@ -54,5 +52,5 @@ const getPaymentDetails = async (userId) => {
 
 module.exports.PaymentFunctions = {
     sendWeeklyPaymentMessage,
-    getPaymentDetails
+    getPaymentDetails,
 }

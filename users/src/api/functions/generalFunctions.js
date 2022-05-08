@@ -55,94 +55,9 @@ const sendConfirmationMail = async (token, email, name, baseURL) => {
     } 
 }
 
-const hostSavePayment = async (event) => {
-  let event2 = await Event.find({ transferCode: event.data.transfer_code });
-
-  await Payment.updateOne(
-    { host: event2.host },
-    {
-      $push: {
-        payments: {
-          reference: event.data.reference,
-          amount: event.data.amount / 100,
-          currency: event.data.currency,
-          paidAt: event.data.paid_at,
-          bank: event.data.authorization.bank,
-          tickets: ticketIds
-        }
-      }
-    }
-  )
-}
-
-const userSavePayment = async (event) => {
-  let tickets = await Ticket.find({ paymentReference: event.data.reference });
-
-  let ticketIds = tickets.map(ticket => {
-    return ticket._id;
-  });
-
-  await User.updateOne(
-    { _id: tickets[0].user },
-    {
-      $push: {
-        payments: {
-          reference: event.data.reference,
-          amount: event.data.amount / 100,
-          currency: event.data.currency,
-          paidAt: event.data.paid_at,
-          bank: event.data.authorization.bank,
-          tickets: ticketIds
-        }
-      }
-    }
-  );
-}
-
-const createRecepientCode = async (name, PaymentNumber, bankName) => {
-  let banks = await fetch('https://api.paystack.co/bank', {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${process.env.PAYSTACK_TEST_SECRET}`,
-    },
-  });
-
-  let banks2 = await banks.json(), code = "";
-
-  for (bank of banks2.data) {
-    if (bankName == bank.name) {
-      code = bank.code;
-      break;
-    }
-  }
-
-  const params = {
-    type: "nuban",
-    name: name,
-    description: `${name}'s recepient code creation`,
-    Payment_number: PaymentNumber,
-    bank_code: code,
-    currency: "NGN"
-  }
-
-  let response = await fetch(`https://api.paystack.co/transferrecipient`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.PAYSTACK_TEST_SECRET}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(params),
-  });
-
-  let response2 = await response.json();
-
-  return response2.data.recipient_code;
-}
-
 const createToken = async () => {
     return await crypto.randomBytes(16).toString("hex");
 }
-
 
 
 module.exports.GeneralFunctions = {
@@ -150,9 +65,6 @@ module.exports.GeneralFunctions = {
     validationErrorCheck,
     returnValidationError,
     sendConfirmationMail,
-    hostSavePayment,
-    userSavePayment,
-    createRecepientCode,
     createToken
 }
 

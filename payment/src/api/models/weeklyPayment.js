@@ -55,7 +55,9 @@ const WeeklyPaymentSchema = new Schema(
                     required: true
                 }
             }
-        ]
+        ],
+
+        transferCode: String,
     },
     {
         autoCreate: true,

@@ -9,22 +9,14 @@ const WebhookSchema = new Schema(
             required: true,
         },
 
-        buyer: {
+        regularUser: {
             type: Schema.Types.ObjectId,
             ref: "user",
-            required: true,
         }, 
-
-        host: {
-            type: Schema.Types.ObjectId,
-            ref: "user",
-            required: true,
-        },
 
         event: {
             type: Schema.Types.ObjectId,
             ref: "event",
-            required: true,
         },
 
         tickets: [
@@ -34,14 +26,17 @@ const WebhookSchema = new Schema(
             }
         ],
 
-        transferCode: {
-            type: String,
-            required: true,
-        },
-
         reference: {
             type: String,
-            required: true,
+        },
+         
+        host: {
+            type: Schema.Types.ObjectId,
+            ref: "user",
+        },
+        
+        transferCode: {
+            type: String,
         },
 
         amount: {

@@ -1,8 +1,10 @@
-const { Event } = require("../../../models/event");
-const { AuthFunctions } = require("../../../functions/auth/authFunctions");
-const { HostManager } = require("../../../managers/user/host/hostManager");
+const amqp = require('amqplib/callback_api');
+const config = require('../../../config');
 const { startSession } = require("mongoose");
 const { Payment } = require("../../../models/payment");
+const { PaymentFunctions } = require("../../../functions/payment/paymentFunctions");
+const { UserFunctions } = require("../../../functions/user/userFunctions");
+
 
 exports.getPaymentDetails = async (req, res) => {
     res.setHeader('access-token', req.token);
@@ -143,4 +145,68 @@ exports.updatePaymentDetails = async (req, res) => {
         );
     }
 }
+
+amqp.connect(config.AMQP_URL, function (error0, connection) {
+    if (error0) {
+        console.log(error0);
+
+        throw error0;
+    }
+
+    connection.createChannel(function (error1, channel) {
+        if (error1) {
+            console.log(error1);
+
+            throw error1;
+        }
+
+        const queue1 = 'Get_Payment_Details';
+
+        channel.assertQueue(queue1, {
+            durable: false
+        });
+
+        let hostPaymentDetails = {};
+
+        channel.consume(queue1, (msg) => {
+            const hostId = JSON.parse(msg.content.toString());
+            
+            hostPaymentDetails = PaymentFunctions.getPaymentDetails(hostId);
+        }, { noAck: true });
+
+        channel.sendToQueue(queue1, Buffer.from(JSON.stringify(hostPaymentDetails)));
+    });
+});
+
+amqp.connect(config.AMQP_URL, function (error0, connection) {
+    if (error0) {
+        console.log(error0);
+
+        throw error0;
+    }
+
+    connection.createChannel(function (error1, channel) {
+        if (error1) {
+            console.log(error1);
+
+            throw error1;
+        }
+
+        const queue1 = 'Get_Tickets';
+
+        channel.assertQueue(queue1, {
+            durable: false
+        });
+
+        let tickets = {};
+
+        channel.consume(queue1, (msg) => {
+            const reference = JSON.parse(msg.content.toString());
+            
+            tickets = UserFunctions.getTickets(reference);
+        }, { noAck: true });
+
+        channel.sendToQueue(queue1, Buffer.from(JSON.stringify(tickets)));
+    });
+});
 
