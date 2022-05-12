@@ -13,7 +13,7 @@ const getPaymentDetails = async (hostId) => {
             
             throw error0;
         }
-    
+
         connection.createChannel(function (error1, channel) {
             if (error1) {
                 console.log(error1);
@@ -26,14 +26,18 @@ const getPaymentDetails = async (hostId) => {
             channel.assertQueue(queue1, {
                 durable: false
             });
-          
+            
             channel.sendToQueue(queue1, Buffer.from(JSON.stringify(hostId)));
         
             channel.consume(queue1, (msg) => {
                 hostPaymentDetails = JSON.parse(msg.content.toString());
+                
+                console.log(hostPaymentDetails);
             }, { noAck: true });
         });
     });
+
+    console.log('Yes');
 
     return paymentDetails;
 }
@@ -108,6 +112,8 @@ const processHostPayment = async () => {
             let recipientCode = "";
 
             const paymentDetails = await getPaymentDetails(weeklyPayment.host);
+
+            console.log(paymentDetails);
 
             if (!paymentDetails.recipientCode) {
                 paymentDetails.recipientCode = await createRecipientCode(
@@ -214,7 +220,7 @@ const updateWeeklyPaymentDoc = async (weeklyPaymentObject) => {
     }
 }
 
-const saveChargeWebhook = (webhookData) => {
+const saveChargeWebhook = async (webhookData) => {
     const payment = await WeeklyPayment.find({ transferCode: webhookData.data.transfer_code });
 
     await Webhook.create(
@@ -229,7 +235,7 @@ const saveChargeWebhook = (webhookData) => {
     );
 }
 
-const saveTransferWebhook = (webhookData) => {
+const saveTransferWebhook = async (webhookData) => {
     const tickets = await getTickets(webhookData.data.reference);
 
     const ticketIds = tickets.map(ticket => {

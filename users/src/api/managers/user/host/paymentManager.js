@@ -1,26 +1,36 @@
 const { Payment } = require("../../../models/payment");
 const { StandardResponse } = require("../../../helpers/standardResponse");
+const mongoose = require("mongoose");
 
-const updatePaymentDetails = async (requestBody, userId) => {
+const createPaymentDetails = async (requestBody, userId) => {
     try {
-        let payment = await Payment.findOne({ host: userId });
+        const { bankDetails } = requestBody;
 
-        requestBody.accountName && (payment.bankDetails[0].accountName = requestBody.accountName);
-        requestBody.accountNumber && (payment.bankDetails[0].accountNumber = requestBody.accountNumber);
-        requestBody.bank && (payment.bankDetails[0].bank = requestBody.bank);
-        requestBody.birthday && (payment.bankDetails[0].birthday = requestBody.birthday);
-        requestBody.phoneNumber && (payment.bankDetails[0].phoneNumber = requestBody.phoneNumber);
+        const paymentDetails = await Payment.findOne({
+            user: userId
+        });
 
-        const result = await payment.save();
+        if (paymentDetails != null) {
+            return StandardResponse.errorMessage("User Payment Details already created");
+        }
+
+        const newPaymentDetails = await Payment.create({
+            _id: mongoose.Types.ObjectId(),
+            user: userId,
+            bankDetails: [
+                {
+                    accountName: bankDetails.accountName,
+                    email: bankDetails.email,
+                    bank: bankDetails.bank,
+                    birthday: bankDetails.birthday,
+                    phoneNumber: bankDetails.phoneNumber
+                }
+            ],
+        });
 
         return StandardResponse.successMessage(
-            'Payment Details Updated Successfully',
-            {
-                _id: result._id,
-                accountName: result.accountName,
-                accountNumber: result.accountNumber,
-                bank: result.bank,
-            }
+            "Payment Details sucessfully created",
+            { bankDetails: newPaymentDetails.bankDetails[0] }
         );
     } catch (error) {
         return StandardResponse.serverError(error);
@@ -28,5 +38,5 @@ const updatePaymentDetails = async (requestBody, userId) => {
 }
 
 module.exports.PaymentManager = {
-    updatePaymentDetails
+    createPaymentDetails
 }

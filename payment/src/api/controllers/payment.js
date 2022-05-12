@@ -1,5 +1,6 @@
 const amqp = require('amqplib/callback_api');
 const config = require('../../../config');
+const cron = require('node-cron');
 const { PaymentFunctions } = require('../functions/paymentFunctions');
 
 
@@ -62,8 +63,22 @@ exports.webhookSuccess = async (req, res) => {
 }
 
 
-cron.schedule('00 12 * * 5', async function () {
+// cron.schedule('00 12 * * 5', async function () {
+//     await PaymentFunctions.processHostPayment();
+// });
+
+// cron.schedule('00 11 * * 2', async function () {
+//     await PaymentFunctions.processHostPayment();
+// });
+
+
+
+exports.test = async (req, res) => {
     await PaymentFunctions.processHostPayment();
-});
+
+    res.sendStatus(200);
+}
+
+
 
 // Cron job for setting the isUsed field on tickets to 'true' after an event ends

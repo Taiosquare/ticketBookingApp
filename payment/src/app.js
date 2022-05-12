@@ -5,7 +5,7 @@ const bodyParser = require("body-parser");
 const helmet = require("helmet");
 const compression = require("compression");
 const api = require("./api/api");
-const config = require("../../users/config");
+const config = require("../config");
 const errorController = require("./api/controllers/error");
 
 require("./db/mongoose.js");

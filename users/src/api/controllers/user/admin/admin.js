@@ -99,7 +99,7 @@ exports.setHostSuspensionStatus = async (req, res) => {
     }
 }
 
-exports.getUser = async (req, res) => {
+exports.viewRegularUser = async (req, res) => {
     res.setHeader('access-token', req.token);
 
     try {
@@ -134,7 +134,7 @@ exports.getUser = async (req, res) => {
     }
 }
 
-exports.getUsers = async (req, res) => {
+exports.viewRegularUsers = async (req, res) => {
     res.setHeader('access-token', req.token);
 
     try {

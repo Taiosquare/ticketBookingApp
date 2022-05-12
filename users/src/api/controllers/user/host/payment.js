@@ -1,12 +1,16 @@
 const amqp = require('amqplib/callback_api');
-const config = require('../../../config');
+const config = require('../../../../../config');
 const { startSession } = require("mongoose");
 const { Payment } = require("../../../models/payment");
 const { PaymentFunctions } = require("../../../functions/payment/paymentFunctions");
 const { UserFunctions } = require("../../../functions/user/userFunctions");
+const { Validations } = require("../../../helpers/validations");
+const { PaymentManager } = require("../../../managers/user/host/paymentManager"); 
+const { StandardResponse } = require("../../../helpers/standardResponse");
+const { RouteResponse } = require("../../../helpers/routeResponse");
 
 
-exports.getPaymentDetails = async (req, res) => {
+exports.viewPaymentDetails = async (req, res) => {
     res.setHeader('access-token', req.token);
 
     try {
@@ -116,7 +120,7 @@ exports.updatePaymentDetails = async (req, res) => {
     }
 }
 
-exports.updatePaymentDetails = async (req, res) => {
+exports.createPaymentDetails = async (req, res) => {
     res.setHeader('access-token', req.token);
     const session = await startSession();
 
@@ -130,10 +134,14 @@ exports.updatePaymentDetails = async (req, res) => {
         const createPaymentDetails = await PaymentManager.createPaymentDetails(req.body, req.user._id);
 
         if (createPaymentDetails.status == false) {
-            throw createPaymentDetails.error;
+            if (createPaymentDetails.serverError == true) {
+                throw createPaymentDetails.error;
+            }
+            
+            return RouteResponse.badRequest(createPaymentDetails, res);
         } 
 
-        RouteResponse.OkMessage200(createPaymentDetails, res);
+        RouteResponse.OkMessage201(createPaymentDetails, res);
     } catch (error) {
         console.log({ error });
 
@@ -146,7 +154,7 @@ exports.updatePaymentDetails = async (req, res) => {
     }
 }
 
-amqp.connect(config.AMQP_URL, function (error0, connection) {
+amqp.connect(config.AMQP_URL, function (error0, connection) {    
     if (error0) {
         console.log(error0);
 
@@ -170,8 +178,12 @@ amqp.connect(config.AMQP_URL, function (error0, connection) {
 
         channel.consume(queue1, (msg) => {
             const hostId = JSON.parse(msg.content.toString());
-            
-            hostPaymentDetails = PaymentFunctions.getPaymentDetails(hostId);
+
+            if (typeof (hostId) != 'object') {
+                hostPaymentDetails = PaymentFunctions.getPaymentDetails(hostId);
+
+                console.log(hostPaymentDetails);
+            }
         }, { noAck: true });
 
         channel.sendToQueue(queue1, Buffer.from(JSON.stringify(hostPaymentDetails)));
@@ -201,9 +213,9 @@ amqp.connect(config.AMQP_URL, function (error0, connection) {
         let tickets = {};
 
         channel.consume(queue1, (msg) => {
-            const reference = JSON.parse(msg.content.toString());
+            const ticket = JSON.parse(msg.content.toString());
             
-            tickets = UserFunctions.getTickets(reference);
+            tickets = UserFunctions.getTickets(ticket.reference);
         }, { noAck: true });
 
         channel.sendToQueue(queue1, Buffer.from(JSON.stringify(tickets)));

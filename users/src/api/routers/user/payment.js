@@ -5,7 +5,21 @@ const { check, param } = require("express-validator");
 const authenticate = require("../../authentication/isAuth");
 
 router
-    .route("/host/updateAccount")
+    .route("/host/viewPaymentDetails")
+    .put(
+        authenticate,
+        hostController.viewPaymentDetails
+    );
+    
+router
+    .route("/host/createPaymentDetails")
+    .put(
+        authenticate,
+        hostController.createPaymentDetails
+    );
+    
+router
+    .route("/host/updatePaymentDetails")
     .patch(
         authenticate,
         hostController.updatePaymentDetails

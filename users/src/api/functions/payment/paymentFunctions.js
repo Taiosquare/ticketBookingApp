@@ -1,6 +1,6 @@
 const amqp = require('amqplib/callback_api');
 const config = require('../../../../config');
-const { User } = require('../../models/user');
+const { Payment } = require('../../models/payment');
 const { EventFunctions } = require('../../functions/event/eventFunctions');
 const { UserFunctions } = require('../../functions/user/userFunctions');
 
