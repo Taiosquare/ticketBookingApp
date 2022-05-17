@@ -168,25 +168,27 @@ amqp.connect(config.AMQP_URL, function (error0, connection) {
             throw error1;
         }
 
-        const queue1 = 'Get_Payment_Details';
+        const queue1 = 'rpc_queue';
 
         channel.assertQueue(queue1, {
             durable: false
         });
 
+        channel.prefetch(1);
+
         let hostPaymentDetails = {};
 
-        channel.consume(queue1, (msg) => {
+        channel.consume(queue1, async (msg) => {
             const hostId = JSON.parse(msg.content.toString());
 
             if (typeof (hostId) != 'object') {
-                hostPaymentDetails = PaymentFunctions.getPaymentDetails(hostId);
-
-                console.log(hostPaymentDetails);
+                hostPaymentDetails = await PaymentFunctions.getPaymentDetails(hostId);
             }
+    
+            channel.sendToQueue(msg.properties.replyTo,
+                Buffer.from(JSON.stringify(hostPaymentDetails))
+            );
         }, { noAck: true });
-
-        channel.sendToQueue(queue1, Buffer.from(JSON.stringify(hostPaymentDetails)));
     });
 });
 

@@ -5,41 +5,67 @@ const config = require('../../../config');
 const mongoose = require("mongoose");
 
 const getPaymentDetails = async (hostId) => {
-    let paymentDetails = {};
-
-    amqp.connect(config.AMQP_URL, function (error0, connection) {
+    amqp.connect(config.AMQP_URL, async (error0, connection) => {
         if (error0) {
             console.log(error0);
             
             throw error0;
         }
 
-        connection.createChannel(function (error1, channel) {
+        await connection.createChannel(function (error1, channel) {
             if (error1) {
                 console.log(error1);
 
                 throw error1;
             }
 
-            const queue1 = 'Get_Payment_Details';
+            channel.assertQueue('', { exclusive: true }, function (error2, q) {
+                if (error2) {
+                    throw error2;
+                }
 
-            channel.assertQueue(queue1, {
-                durable: false
+                channel.consume(q.queue, async (msg) => {
+                    let paymentDetails = {};
+
+                    paymentDetails = JSON.parse(msg.content.toString());
+
+                    return paymentDetails;
+                }, {
+                    noAck: true
+                });
+
+                channel.sendToQueue('rpc_queue',
+                    Buffer.from(JSON.stringify(hostId)), {
+                        replyTo: q.queue
+                    }        
+                );
             });
-            
-            channel.sendToQueue(queue1, Buffer.from(JSON.stringify(hostId)));
-        
-            channel.consume(queue1, (msg) => {
-                hostPaymentDetails = JSON.parse(msg.content.toString());
-                
-                console.log(hostPaymentDetails);
-            }, { noAck: true });
         });
     });
 
-    console.log('Yes');
+    
+    
+    // let connection = await amqp.connect(config.AMQP_URL);
 
-    return paymentDetails;
+    // await connection.createChannel(); 
+
+    // let q = await channel.assertQueue('', { exclusive: true }); 
+
+    // let msg = await channel.consume(q.queue, { noAck: true });  
+        
+    // let paymentDetails = {};
+
+    // paymentDetails = JSON.parse(msg.content.toString());
+
+    // console.log(paymentDetails);
+
+    // channel.sendToQueue('rpc_queue',
+    //     Buffer.from(JSON.stringify(hostId)), {
+    //         replyTo: q.queue
+    //     }        
+    // );
+
+    // return paymentDetails;
 }
 
 const getTickets = async (reference) => {
@@ -104,67 +130,79 @@ const sendUpdatedPaymentDetails = async () => {
 
 }
 
+const makeHostPayment = async (paymentDetails) => {
+    try {
+        let recipientCode = "";
+
+        if (!paymentDetails.recipientCode) {
+            paymentDetails.recipientCode = await createRecipientCode(
+                paymentDetails.bankDetails[0].accountName,
+                paymentDetails.bankDetails[0].bank.accountNumber,
+                paymentDetails.bankDetails[0].bank.code
+            );
+
+            // Send updated payment details
+            // sendUpdatedPaymentDetails(paymentDetails);
+
+            recipientCode = paymentDetails.recipientCode;
+        } else {
+            recipientCode = paymentDetails.recipientCode;
+        }
+
+        let totalAmount = 0;
+
+        for (payment of weeklyPayment.payments) {
+            totalAmount += (payment.price * payment.spacesBooked);
+        }
+
+        const params = {
+            "source": "balance",
+            "reason": "Order Product Payment",
+            "amount": totalAmount,
+            "recipient": recipientCode
+        }
+
+        const response = await fetch(`https://api.paystack.co/transfer`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${config.PAYSTACK_SECRET}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(params),
+        });
+
+        const response2 = await response.json();
+
+        if (response2.status == true) {
+            await WeeklyPayment.updateOne(
+                {
+                    _id: weeklyPayment._id
+                },
+                {
+                    transferCode: response2.data.transfer_code
+                }
+            );
+        } else {
+            console.log("Paystack Payment Failed");
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 const processHostPayment = async () => {
     const weeklyPayments = await WeeklyPayment.find();
 
     for (weeklyPayment of weeklyPayments) {
         try {
-            let recipientCode = "";
-
             const paymentDetails = await getPaymentDetails(weeklyPayment.host);
 
-            console.log(paymentDetails);
+            setTimeout(functionCall, 3000);
 
-            if (!paymentDetails.recipientCode) {
-                paymentDetails.recipientCode = await createRecipientCode(
-                    paymentDetails.bankDetails.accountName,
-                    paymentDetails.bankDetails.bank.accountNumber,
-                    paymentDetails.bankDetails.bank.code
-                );
+            const functionCall = async () => {
+                let details = paymentDetails;
 
-                // Send updated payment details
-                sendUpdatedPaymentDetails(paymentDetails);
-
-                recipientCode = paymentDetails.recipientCode;
-            } else {
-                recipientCode = paymentDetails.recipientCode;
-            }
-
-            let totalAmount = 0;
-
-            for (payment of weeklyPayment.payments) {
-                totalAmount += (payment.price * payment.spacesBooked);
-            }
-
-            const params = {
-                "source": "balance",
-                "reason": "Order Product Payment",
-                "amount": totalAmount,
-                "recipient": recipientCode
-            }
-
-            const response = await fetch(`https://api.paystack.co/transfer`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${config.PAYSTACK_SECRET}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(params),
-            });
-
-            const response2 = await response.json();
-
-            if (response2.status == true) {
-                await WeeklyPayment.updateOne(
-                    {
-                        _id: weeklyPayment._id
-                    },
-                    {
-                        transferCode: response2.data.transfer_code
-                    }
-                );
-            } else {
-                console.log("Paystack Payment Failed");
+                await makeHostPayment(details);
             }
         } catch (error) {
             console.log(error);
