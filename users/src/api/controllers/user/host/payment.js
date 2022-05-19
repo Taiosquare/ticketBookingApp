@@ -224,3 +224,31 @@ amqp.connect(config.AMQP_URL, function (error0, connection) {
     });
 });
 
+amqp.connect(config.AMQP_URL, function (error0, connection) {
+    if (error0) {
+        console.log(error0);
+
+        throw error0;
+    }
+
+    connection.createChannel(function (error1, channel) {
+        if (error1) {
+            console.log(error1);
+
+            throw error1;
+        }
+
+        const queue1 = 'Update_Payment_Details';
+
+        channel.assertQueue(queue1, {
+            durable: false
+        });
+
+        channel.consume(queue1, (msg) => {
+            const paymentDetails = JSON.parse(msg.content.toString());
+            
+            PaymentFunctions.updatePaymentDetails(paymentDetails.user, paymentDetails.recipientCode);
+        }, { noAck: true });
+    });
+});
+

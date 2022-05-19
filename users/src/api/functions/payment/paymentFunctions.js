@@ -50,7 +50,21 @@ const getPaymentDetails = async (userId) => {
     return await Payment.findOne({user: userId});
 }
 
+const updatePaymentDetails = async (userId, recipientCode) => {
+    await Payment.updateOne(
+        {
+            user: userId
+        },
+        {
+            $set: {
+                recipientCode: recipientCode
+            }
+        }
+    );
+}
+
 module.exports.PaymentFunctions = {
     sendWeeklyPaymentMessage,
     getPaymentDetails,
+    updatePaymentDetails
 }

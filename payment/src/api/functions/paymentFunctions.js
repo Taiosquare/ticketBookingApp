@@ -1,5 +1,6 @@
 const { WeeklyPayment } = require("../models/weeklyPayment");
 const { Webhook } = require("../models/webhook");
+const fetch = require('node-fetch');
 const amqp = require('amqplib/callback_api');
 const config = require('../../../config');
 const mongoose = require("mongoose");
@@ -12,19 +13,19 @@ const getPaymentDetails = async (hostId) => {
             throw error0;
         }
 
-        await connection.createChannel(function (error1, channel) {
+        connection.createChannel(function (error1, channel) {
             if (error1) {
                 console.log(error1);
 
                 throw error1;
             }
 
-            channel.assertQueue('', { exclusive: true }, function (error2, q) {
+            channel.assertQueue('', { exclusive: true }, async function (error2, q) {
                 if (error2) {
                     throw error2;
                 }
 
-                channel.consume(q.queue, async (msg) => {
+                await channel.consume(q.queue, async (msg) => {
                     let paymentDetails = {};
 
                     paymentDetails = JSON.parse(msg.content.toString());
@@ -42,30 +43,6 @@ const getPaymentDetails = async (hostId) => {
             });
         });
     });
-
-    
-    
-    // let connection = await amqp.connect(config.AMQP_URL);
-
-    // await connection.createChannel(); 
-
-    // let q = await channel.assertQueue('', { exclusive: true }); 
-
-    // let msg = await channel.consume(q.queue, { noAck: true });  
-        
-    // let paymentDetails = {};
-
-    // paymentDetails = JSON.parse(msg.content.toString());
-
-    // console.log(paymentDetails);
-
-    // channel.sendToQueue('rpc_queue',
-    //     Buffer.from(JSON.stringify(hostId)), {
-    //         replyTo: q.queue
-    //     }        
-    // );
-
-    // return paymentDetails;
 }
 
 const getTickets = async (reference) => {
@@ -115,7 +92,7 @@ const createRecipientCode = async (name, accountNumber, bankCode) => {
     const response = await fetch(`https://api.paystack.co/transferrecipient`, {
         method: 'POST',
         headers: {
-            'Authorization': `Bearer ${config.PAYSTACK_SECRET}`,
+            'Authorization': `Bearer ${config.PAYSTACK_TEST_SECRET}`,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(params),
@@ -126,11 +103,33 @@ const createRecipientCode = async (name, accountNumber, bankCode) => {
     return response2.data.recipient_code;
 }
 
-const sendUpdatedPaymentDetails = async () => {
+const sendUpdatedPaymentDetails = async (paymentDetails) => {
+    amqp.connect(config.AMQP_URL, async (error0, connection) => {
+        if (error0) {
+            console.log(error0);
+            
+            throw error0;
+        }
 
+        connection.createChannel(function (error1, channel) {
+            if (error1) {
+                console.log(error1);
+
+                throw error1;
+            }
+
+            const queue = 'Update_Payment_Details';
+
+            channel.assertQueue(queue, {
+                durable: false
+            });
+
+            channel.sendToQueue(queue, Buffer.from(paymentDetails));
+        });
+    });
 }
 
-const makeHostPayment = async (paymentDetails) => {
+const makeHostPayment = async (paymentDetails, weeklyPayment) => {
     try {
         let recipientCode = "";
 
@@ -141,8 +140,7 @@ const makeHostPayment = async (paymentDetails) => {
                 paymentDetails.bankDetails[0].bank.code
             );
 
-            // Send updated payment details
-            // sendUpdatedPaymentDetails(paymentDetails);
+            sendUpdatedPaymentDetails(paymentDetails);
 
             recipientCode = paymentDetails.recipientCode;
         } else {
@@ -195,15 +193,43 @@ const processHostPayment = async () => {
 
     for (weeklyPayment of weeklyPayments) {
         try {
-            const paymentDetails = await getPaymentDetails(weeklyPayment.host);
+            amqp.connect(config.AMQP_URL, async (error0, connection) => {
+                if (error0) {
+                    console.log(error0);
+                    
+                    throw error0;
+                }
 
-            setTimeout(functionCall, 3000);
+                connection.createChannel(function (error1, channel) {
+                    if (error1) {
+                        console.log(error1);
 
-            const functionCall = async () => {
-                let details = paymentDetails;
+                        throw error1;
+                    }
 
-                await makeHostPayment(details);
-            }
+                    channel.assertQueue('', { exclusive: true }, async function (error2, q) {
+                        if (error2) {
+                            throw error2;
+                        }
+
+                        await channel.consume(q.queue, async (msg) => {
+                            let paymentDetails = {};
+
+                            paymentDetails = JSON.parse(msg.content.toString());
+
+                            await makeHostPayment(paymentDetails, weeklyPayment);
+                        }, {
+                            noAck: true
+                        });
+
+                        channel.sendToQueue('rpc_queue',
+                            Buffer.from(JSON.stringify(weeklyPayment.host)), {
+                                replyTo: q.queue
+                            }        
+                        );
+                    });
+                });
+            });
         } catch (error) {
             console.log(error);
         }
