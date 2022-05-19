@@ -57,9 +57,54 @@ const getRegularUserObject = () => {
     return regularUserObject;
 }
 
-const getUser = async (userId, accessToken, refreshToken) => {
+const getRegularUsers = async (accessToken, refreshToken) => {
+    const response = await request(app)
+        .get('/admin/viewRegularUsers')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .set('refresh-token', refreshToken);
+
+    return response;
+}
+
+const getRegularUser = async (userId, accessToken, refreshToken) => {
     const response = await request(app)
         .get(`/admin/viewRegularUser/${userId}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .set('refresh-token', refreshToken);
+
+    return response;
+}
+
+const getAdmins = async (accessToken, refreshToken) => {
+    const response = await request(app)
+        .get('/admin/viewAdmins')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .set('refresh-token', refreshToken);
+
+    return response;
+}
+
+const getAdmin = async (adminId, accessToken, refreshToken) => {
+    const response = await request(app)
+        .get(`/admin/viewAdmin/${adminId}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .set('refresh-token', refreshToken);
+
+    return response;
+}
+
+const getHosts = async (accessToken, refreshToken) => {
+    const response = await request(app)
+        .get('/admin/viewHosts')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .set('refresh-token', refreshToken);
+
+    return response;
+}
+
+const getHost = async (hostId, accessToken, refreshToken) => {
+    const response = await request(app)
+        .get(`/admin/viewHost/${hostId}`)
         .set('Authorization', `Bearer ${accessToken}`)
         .set('refresh-token', refreshToken);
 
@@ -74,6 +119,11 @@ module.exports.UserTestFunctions = {
     getAdminObject,
     getHostObject,
     getRegularUserObject,
-    getUser,
+    getRegularUsers,
+    getRegularUser,
+    getAdmins,
+    getAdmin,
+    getHosts,
+    getHost,
     deleteUser
 }

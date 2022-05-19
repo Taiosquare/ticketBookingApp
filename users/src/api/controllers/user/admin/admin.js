@@ -159,7 +159,7 @@ exports.viewRegularUsers = async (req, res) => {
     }
 }
 
-exports.getHost = async (req, res) => {
+exports.viewHost = async (req, res) => {
     res.setHeader('access-token', req.token);
 
     try {
@@ -193,7 +193,7 @@ exports.getHost = async (req, res) => {
     }
 }
 
-exports.getHosts = async (req, res) => {
+exports.viewHosts = async (req, res) => {
     res.setHeader('access-token', req.token);
 
     try {
@@ -218,7 +218,7 @@ exports.getHosts = async (req, res) => {
     }
 }
 
-exports.getEvents = async (req, res) => {
+exports.viewEvents = async (req, res) => {
     res.setHeader('access-token', req.token);
 
     try {
@@ -250,7 +250,7 @@ exports.getEvents = async (req, res) => {
     }
 }
 
-exports.getAdministrator = async (req, res) => {
+exports.viewAdministrator = async (req, res) => {
     res.setHeader('access-token', req.token);
 
     try {
@@ -283,7 +283,7 @@ exports.getAdministrator = async (req, res) => {
     }
 }
 
-exports.getAdministrators = async (req, res) => {
+exports.viewAdministrators = async (req, res) => {
     res.setHeader('access-token', req.token);
 
     try {

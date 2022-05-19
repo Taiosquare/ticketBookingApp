@@ -63,22 +63,19 @@ exports.webhookSuccess = async (req, res) => {
 }
 
 
-// cron.schedule('00 12 * * 5', async function () {
-//     await PaymentFunctions.processHostPayment();
-// });
-
-// cron.schedule('00 11 * * 2', async function () {
-//     await PaymentFunctions.processHostPayment();
-// });
-
-
-
-exports.test = async (req, res) => {
+cron.schedule('00 12 * * 5', async function () {
     await PaymentFunctions.processHostPayment();
+});
 
-    res.sendStatus(200);
-}
 
+cron.schedule('00 15 * * 5', async function () {
+    await PaymentFunctions.processHostPayment();
+});
+
+
+// exports.test = async (req, res) => {
+//     res.sendStatus(200);
+// }
 
 
 // Cron job for setting the isUsed field on tickets to 'true' after an event ends

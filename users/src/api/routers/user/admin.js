@@ -45,47 +45,51 @@ router
     );
     
 router
-    .route("/getHost/:hostId")
+    .route("/viewHost/:hostId")
     .get(
         authenticate,
-        adminController.getHost
+        [
+            param("hostId", "Invalid hostId Type").isMongoId(),
+        ],
+        adminController.viewHost
     );
 
 router
-    .route("/getHosts")
+    .route("/viewHosts")
     .get(
         authenticate,
-        adminController.getHosts
+        adminController.viewHosts
     );
     
 router
-    .route("/getEvents")
+    .route("/viewEvents")
     .get(
         authenticate,
-        adminController.getEvents
+        adminController.viewEvents
     );
     
 router
-    .route("/getAdmin/:adminId")
+    .route("/viewAdmin/:adminId")
     .get(
-      authenticate,
-      adminController.getAdministrator
+        authenticate,
+        [
+            param("adminId", "Invalid adminId Type").isMongoId(),
+        ],
+        adminController.viewAdministrator
     );
 
 router
-    .route("/getAdmins")
+    .route("/viewAdmins")
     .get(
       authenticate,
-      adminController.getAdministrators
+      adminController.viewAdministrators
     );
     
 router
     .route("/suspendAdmin/:adminId")
     .put(
-      authenticate,
-      adminController.suspendAdministrator
+        authenticate,
+        adminController.suspendAdministrator
     );
-
-// Get ticket
     
 module.exports = router;

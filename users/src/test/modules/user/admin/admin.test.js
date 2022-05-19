@@ -31,19 +31,150 @@ describe("Admin Operations", () => {
     });
 
     describe("View Hosts", () => {
+        const hostObject = UserTestFunctions.getHostObject();
 
+        beforeAll(async () => {
+            await AuthTestFunctions.createAdmin(hostObject, accessToken, refreshToken);
+        });
+
+        afterAll(async () => {
+            await UserTestFunctions.deleteUser("kutupa123@protonmail.com");
+        });
+        
+        test("response status code is 200 if admins are returned successfully", async () => {
+            const response = await UserTestFunctions.getHosts(accessToken, refreshToken);
+
+            expect(response.statusCode).toBe(200);
+        });
+
+        test("response body object has the correct fields", async () => {
+            const response = await UserTestFunctions.getHosts(accessToken, refreshToken);
+
+            expect(response.body.data.hosts[0]).toHaveProperty('businessDetails');
+            expect(response.body.data.hosts[0].businessDetails).toHaveProperty('name');
+            expect(response.body.data.hosts[0].businessDetails).toHaveProperty('email');
+            expect(response.body.data.hosts[0].businessDetails).toHaveProperty('type');
+            expect(response.body.data.hosts[0]).toHaveProperty('createdAt');
+            expect(response.body.data.hosts[0]).toHaveProperty('updatedAt');
+        });
     });
 
     describe("View Host", () => {
+        afterEach(async () => {
+            await UserTestFunctions.deleteUser("kutupa123@protonmail.com");
+        });
 
+        const hostObject = UserTestFunctions.getHostObject();
+
+        test("response status code is 200 if user is returned successfully", async () => {
+            const response = await AuthTestFunctions.registerUser(hostObject);
+
+            const user = await UserTestFunctions.getHost(response.body.user._id, accessToken, refreshToken);
+
+            expect(user.statusCode).toBe(200);
+        });
+
+        test("response body object has the correct values", async () => {
+            const response = await AuthTestFunctions.registerUser(hostObject);
+
+            const user = await UserTestFunctions.getHost(response.body.user._id, accessToken, refreshToken);
+
+            expect(user.body.data.user.username).toBe('Mole123');
+            expect(user.body.data.user.firstname).toBe('Oaikhina');
+            expect(user.body.data.user.lastname).toBe('Eromonsele');
+            expect(user.body.data.user.email).toBe('eronoiak@gmail.com');
+            expect(user.body.data.user.businessDetails.name).toBe('Taiosquare Financials');
+            expect(user.body.data.user.businessDetails.email).toBe('contact@taiosquare.com');
+            expect(user.body.data.user.businessDetails.type).toBe('Educational');
+            expect(user.body.data.user.businessDetails.description).toBe('We are committed to helping you learn how to make money online');
+            expect(user.body.data.user.businessDetails.landline).toBe('+2347049008888');
+            expect(user.body.data.user.role).toBe('host');
+        });
+
+        const hostId_mongoId = "Invalid hostId Type";
+
+        it.each`
+            value                   | expectedMessage
+            ${'test'}               | ${hostId_mongoId}
+            ${12}                   | ${hostId_mongoId}
+            ${true}                 | ${hostId_mongoId}
+        `('returns $expectedMessage when $value is sent as userId', async ({ value, expectedMessage }) => {
+            const user = await UserTestFunctions.getHost(value, accessToken, refreshToken);
+
+            const body = user.body;
+            expect(body.errors).toContain(expectedMessage);
+        });
     });
 
     describe("View Admins", () => {
+        const adminObject = UserTestFunctions.getAdminObject();
 
+        beforeAll(async () => {
+            await AuthTestFunctions.createAdmin(adminObject, accessToken, refreshToken);
+        });
+
+        afterAll(async () => {
+            await UserTestFunctions.deleteUser("eronoiak@gmail.com");
+        });
+        
+        test("response status code is 200 if admins are returned successfully", async () => {
+            const response = await UserTestFunctions.getAdmins(accessToken, refreshToken);
+
+            expect(response.statusCode).toBe(200);
+        });
+
+        test("response body object has the correct fields", async () => {
+            const response = await UserTestFunctions.getAdmins(accessToken, refreshToken);
+
+            expect(response.body.data.admins[0]).toHaveProperty('username');
+            expect(response.body.data.admins[0]).toHaveProperty('firstname');
+            expect(response.body.data.admins[0]).toHaveProperty('lastname');
+            expect(response.body.data.admins[0]).toHaveProperty('email');
+            expect(response.body.data.admins[0]).toHaveProperty('createdAt');
+            expect(response.body.data.admins[0]).toHaveProperty('updatedAt');
+        });
     });
 
     describe("View Admin", () => {
+        afterEach(async () => {
+            await UserTestFunctions.deleteUser("eronoiak@gmail.com");
+        });
 
+        const adminObject = UserTestFunctions.getAdminObject();
+
+        test("response status code is 200 if user is returned successfully", async () => {
+            const response = await AuthTestFunctions.createAdmin(adminObject, accessToken, refreshToken);
+
+            const user = await UserTestFunctions.getAdmin(response.body.user._id, accessToken, refreshToken);
+
+            expect(user.statusCode).toBe(200);
+        });
+
+        test("response body object has the correct values", async () => {
+            const response = await AuthTestFunctions.createAdmin(adminObject, accessToken, refreshToken);
+
+            const user = await UserTestFunctions.getAdmin(response.body.user._id, accessToken, refreshToken);
+
+            expect(user.body.data.user.username).toBe('Mole123');
+            expect(user.body.data.user.firstname).toBe('Oaikhina');
+            expect(user.body.data.user.lastname).toBe('Eromonsele');
+            expect(user.body.data.user.email).toBe('eronoiak@gmail.com');
+            expect(user.body.data.user.role).toBe('admin');
+        });
+
+        const adminId_mongoId = "Invalid adminId Type";
+
+        it.each`
+            value                   | expectedMessage
+            ${'test'}               | ${adminId_mongoId}
+            ${12}                   | ${adminId_mongoId}
+            ${true}                 | ${adminId_mongoId}
+        `('returns $expectedMessage when $value is sent as userId', async ({ value, expectedMessage }) => {
+            const user = await UserTestFunctions.getAdmin(value, accessToken, refreshToken);
+
+            const body = user.body;
+            expect(body.errors).toContain(expectedMessage);
+        });
     });
         
     describe("View Regular Users", () => {

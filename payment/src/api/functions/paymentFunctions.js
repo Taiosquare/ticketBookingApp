@@ -124,7 +124,7 @@ const sendUpdatedPaymentDetails = async (paymentDetails) => {
                 durable: false
             });
 
-            channel.sendToQueue(queue, Buffer.from(paymentDetails));
+            channel.sendToQueue(queue, Buffer.from(JSON.stringify(paymentDetails)));
         });
     });
 }
@@ -156,14 +156,14 @@ const makeHostPayment = async (paymentDetails, weeklyPayment) => {
         const params = {
             "source": "balance",
             "reason": "Order Product Payment",
-            "amount": totalAmount,
+            "amount": totalAmount * 100,
             "recipient": recipientCode
         }
 
         const response = await fetch(`https://api.paystack.co/transfer`, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${config.PAYSTACK_SECRET}`,
+                'Authorization': `Bearer ${config.PAYSTACK_TEST_SECRET}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(params),
