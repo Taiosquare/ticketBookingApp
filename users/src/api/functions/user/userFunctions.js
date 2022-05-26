@@ -10,6 +10,5 @@ const getTickets = async (reference) => {
 }
 
 module.exports.UserFunctions = {
-    getUserById,
-    getTickets
+    getUserById, getTickets
 } 

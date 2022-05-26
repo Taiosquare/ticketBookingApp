@@ -1,18 +1,18 @@
 const request = require('supertest');
 const { app } = require('../../app');
 
-const approveUser = (userId, accessToken, refreshToken) => {
+const approveUser = async (userId, accessToken, refreshToken) => {
     const response = await request(app)
-        .patch(`/admin/approveUser/${userId}`)
+        .put(`/admin/approveHost/${userId}`)
         .set('Authorization', `Bearer ${accessToken}`)
         .set('refresh-token', refreshToken);
 
     return response;
 }
 
-const setHostSuspensionStatus = (userId, body, accessToken, refreshToken) => {
+const setHostSuspensionStatus = async (userId, body, accessToken, refreshToken) => {
     const response = await request(app)
-        .patch(`/admin/suspendHost/${userId}`)
+        .put(`/admin/suspendHost/${userId}`)
         .set('Authorization', `Bearer ${accessToken}`)
         .set('refresh-token', refreshToken)
         .send(body);

@@ -20,8 +20,8 @@ router
         authenticate,
         [
             check("status")
-                .notEmpty().withMessage("User Suspension Status cannot be empty").bail()
-                .isBoolean().withMessage("User Suspension Status should be a Boolean"),
+                .notEmpty().withMessage("Host Suspension Status cannot be empty").bail()
+                .isBoolean().withMessage("Host Suspension Status should be a Boolean"),
             param("hostId", "Invalid hostId Type").isMongoId(),
         ],
         adminController.setHostSuspensionStatus

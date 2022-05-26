@@ -27,7 +27,7 @@ const getHostObject = () => {
         businessDetails: {
             name: "Taiosquare Financials",
             email: "contact@taiosquare.com",
-            type: "Educational",
+            type: "Education",
             description: "We are committed to helping you learn how to make money online",
             website: "www.taiosquare.com",
             landline: "+2347049008888",

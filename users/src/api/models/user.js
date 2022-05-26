@@ -81,6 +81,11 @@ const BusinessDetailsSchema = new Schema(
             lowercase: true,
         },
 
+        type: {
+            type: String,
+            required: true
+        },
+
         description: {
             type: String,
             required: true

@@ -115,7 +115,7 @@ const login = async (requestBody) => {
         let user = await AuthFunctions.findUserByEmail(email);
 
         if ((!user) || (!await argon2.verify(user.password, password))) {
-            return StandardResponse.errorMessage("Invalid Username or Password");
+            return StandardResponse.errorMessage("Invalid Email or Password");
         }
 
         const refreshToken = await AuthFunctions.generateRefreshToken(user._id);

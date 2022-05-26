@@ -7,7 +7,6 @@ const { AdminTestFunctions } = require('../../../functions/adminTestFunctions')
 
 let accessToken = "";
 let refreshToken = "";
-let userId = "";
 
 afterAll(async () => {
     await server.close();
@@ -17,24 +16,20 @@ jest.setTimeout(30000);
 
 describe("Admin Operations", () => {
     beforeAll(async () => {
-        const response = await TestFunctions.loginUser(
-            "jackson.ogunmasa@gmail.com",
-            "1570&JugaR"
+        const response = await AuthTestFunctions.loginUser(
+            "osaigbovojoshua@yahoo.com",
+            "11720$GbesE"
         );
 
-        accessToken = response.body.tokens.access.token;
-        refreshToken = response.body.tokens.refresh.token;
-    });
-
-    afterAll(async () => {
-        await server.close();
+        accessToken = response.body.data.tokens.access.token;
+        refreshToken = response.body.data.tokens.refresh.token;
     });
 
     describe("View Hosts", () => {
         const hostObject = UserTestFunctions.getHostObject();
 
         beforeAll(async () => {
-            await AuthTestFunctions.createAdmin(hostObject, accessToken, refreshToken);
+            await AuthTestFunctions.registerUser(hostObject, accessToken, refreshToken);
         });
 
         afterAll(async () => {
@@ -69,7 +64,7 @@ describe("Admin Operations", () => {
         test("response status code is 200 if user is returned successfully", async () => {
             const response = await AuthTestFunctions.registerUser(hostObject);
 
-            const user = await UserTestFunctions.getHost(response.body.user._id, accessToken, refreshToken);
+            const user = await UserTestFunctions.getHost(response.body.data.user._id, accessToken, refreshToken);
 
             expect(user.statusCode).toBe(200);
         });
@@ -77,18 +72,18 @@ describe("Admin Operations", () => {
         test("response body object has the correct values", async () => {
             const response = await AuthTestFunctions.registerUser(hostObject);
 
-            const user = await UserTestFunctions.getHost(response.body.user._id, accessToken, refreshToken);
+            const user = await UserTestFunctions.getHost(response.body.data.user._id, accessToken, refreshToken);
 
-            expect(user.body.data.user.username).toBe('Mole123');
-            expect(user.body.data.user.firstname).toBe('Oaikhina');
-            expect(user.body.data.user.lastname).toBe('Eromonsele');
-            expect(user.body.data.user.email).toBe('eronoiak@gmail.com');
-            expect(user.body.data.user.businessDetails.name).toBe('Taiosquare Financials');
-            expect(user.body.data.user.businessDetails.email).toBe('contact@taiosquare.com');
-            expect(user.body.data.user.businessDetails.type).toBe('Educational');
-            expect(user.body.data.user.businessDetails.description).toBe('We are committed to helping you learn how to make money online');
-            expect(user.body.data.user.businessDetails.landline).toBe('+2347049008888');
-            expect(user.body.data.user.role).toBe('host');
+            expect(user.body.data.host.username).toBe('BashDot');
+            expect(user.body.data.host.firstname).toBe('Oladotun');
+            expect(user.body.data.host.lastname).toBe('Bashorun');
+            expect(user.body.data.host.email).toBe('kutupa123@protonmail.com');
+            expect(user.body.data.host.businessDetails.name).toBe('Taiosquare Financials');
+            expect(user.body.data.host.businessDetails.email).toBe('contact@taiosquare.com');
+            expect(user.body.data.host.businessDetails.type).toBe('Education');
+            expect(user.body.data.host.businessDetails.description).toBe('We are committed to helping you learn how to make money online');
+            expect(user.body.data.host.businessDetails.landline).toBe('+2347049008888');
+            expect(user.body.data.host.role).toBe('host');
         });
 
         const hostId_mongoId = "Invalid hostId Type";
@@ -145,7 +140,7 @@ describe("Admin Operations", () => {
         test("response status code is 200 if user is returned successfully", async () => {
             const response = await AuthTestFunctions.createAdmin(adminObject, accessToken, refreshToken);
 
-            const user = await UserTestFunctions.getAdmin(response.body.user._id, accessToken, refreshToken);
+            const user = await UserTestFunctions.getAdmin(response.body.data.user._id, accessToken, refreshToken);
 
             expect(user.statusCode).toBe(200);
         });
@@ -153,13 +148,13 @@ describe("Admin Operations", () => {
         test("response body object has the correct values", async () => {
             const response = await AuthTestFunctions.createAdmin(adminObject, accessToken, refreshToken);
 
-            const user = await UserTestFunctions.getAdmin(response.body.user._id, accessToken, refreshToken);
+            const user = await UserTestFunctions.getAdmin(response.body.data.user._id, accessToken, refreshToken);
 
-            expect(user.body.data.user.username).toBe('Mole123');
-            expect(user.body.data.user.firstname).toBe('Oaikhina');
-            expect(user.body.data.user.lastname).toBe('Eromonsele');
-            expect(user.body.data.user.email).toBe('eronoiak@gmail.com');
-            expect(user.body.data.user.role).toBe('admin');
+            expect(user.body.data.admin.username).toBe('Mole123');
+            expect(user.body.data.admin.firstname).toBe('Oaikhina');
+            expect(user.body.data.admin.lastname).toBe('Eromonsele');
+            expect(user.body.data.admin.email).toBe('eronoiak@gmail.com');
+            expect(user.body.data.admin.role).toBe('admin');
         });
 
         const adminId_mongoId = "Invalid adminId Type";
@@ -189,13 +184,13 @@ describe("Admin Operations", () => {
         });
         
         test("response status code is 200 if users are returned successfully", async () => {
-            const response = await UserTestFunctions.getUsers(accessToken, refreshToken);
+            const response = await UserTestFunctions.getRegularUsers(accessToken, refreshToken);
 
             expect(response.statusCode).toBe(200);
         });
 
         test("response body object has the correct fields", async () => {
-            const response = await UserTestFunctions.getUsers(accessToken, refreshToken);
+            const response = await UserTestFunctions.getRegularUsers(accessToken, refreshToken);
 
             expect(response.body.data.users[0]).toHaveProperty('username');
             expect(response.body.data.users[0]).toHaveProperty('firstname');
@@ -216,7 +211,7 @@ describe("Admin Operations", () => {
         test("response status code is 200 if user is returned successfully", async () => {
             const response = await AuthTestFunctions.registerUser(regularUserObject);
 
-            const user = await UserTestFunctions.getUser(response.body.user._id, accessToken, refreshToken);
+            const user = await UserTestFunctions.getRegularUser(response.body.data.user._id, accessToken, refreshToken);
 
             expect(user.statusCode).toBe(200);
         });
@@ -224,7 +219,7 @@ describe("Admin Operations", () => {
         test("response body object has the correct values", async () => {
             const response = await AuthTestFunctions.registerUser(regularUserObject);
 
-            const user = await UserTestFunctions.getUser(response.body.user._id, accessToken, refreshToken);
+            const user = await UserTestFunctions.getRegularUser(response.body.data.user._id, accessToken, refreshToken);
 
             expect(user.body.data.user.username).toBe('Taiosquare');
             expect(user.body.data.user.firstname).toBe('Joshua');
@@ -241,7 +236,7 @@ describe("Admin Operations", () => {
             ${12}                   | ${userId_mongoId}
             ${true}                 | ${userId_mongoId}
         `('returns $expectedMessage when $value is sent as userId', async ({ value, expectedMessage }) => {
-            const user = await UserTestFunctions.getUser(value, accessToken, refreshToken);
+            const user = await UserTestFunctions.getRegularUser(value, accessToken, refreshToken);
 
             const body = user.body;
             expect(body.errors).toContain(expectedMessage);
@@ -255,37 +250,37 @@ describe("Admin Operations", () => {
             await UserTestFunctions.deleteUser("kutupa123@protonmail.com");
         });
 
-        test("response status code is 200 if user is approved successfully", async () => {
+        test("response status code is 200 if host is approved successfully", async () => {
             const user = await AuthTestFunctions.registerUser(hostObject);
 
-            const response = await AdminTestFunctions.approveUser(user.body.user._id, accessToken, refreshToken);
+            const response = await AdminTestFunctions.approveUser(user.body.data.user._id, accessToken, refreshToken);
 
             expect(response.statusCode).toBe(200);
         });
 
-        test("response body has a success message if user is approved successfully", async () => {
+        test("response body has a success message if host is approved successfully", async () => {
             const user = await AuthTestFunctions.registerUser(hostObject);
 
-            const response = await AdminTestFunctions.approveUser(user.body.user._id, accessToken, refreshToken);
+            const response = await AdminTestFunctions.approveUser(user.body.data.user._id, accessToken, refreshToken);
 
             expect(response.body.message).toEqual("Host Approved Successfully.");
         });
 
-        test("response body has a user object if user is approved successfully", async () => {
+        test("response body has a user object if host is approved successfully", async () => {
             const user = await AuthTestFunctions.registerUser(hostObject);
 
-            const response = await AdminTestFunctions.approveUser(user.body.user._id, accessToken, refreshToken);
+            const response = await AdminTestFunctions.approveUser(user.body.data.user._id, accessToken, refreshToken);
 
-            expect(response.body.user).toHaveProperty("name");
-            expect(response.body.user).toHaveProperty("email");
+            expect(response.body.data.host).toHaveProperty("name");
+            expect(response.body.data.host).toHaveProperty("email");
         });
 
         test("Account approval status was set to true in the database", async () => {
             const response = await AuthTestFunctions.registerUser(hostObject);
 
-            await AdminTestFunctions.approveUser(response.body.user._id, accessToken, refreshToken);
+            await AdminTestFunctions.approveUser(response.body.data.user._id, accessToken, refreshToken);
 
-            const user = await User.findById(response.body.user._id);
+            const user = await User.findById(response.body.data.user._id);
 
             expect(user.accountApproved).toBe(true);
         });
@@ -298,7 +293,7 @@ describe("Admin Operations", () => {
             ${12}                   | ${hostId_mongoId}
             ${true}                 | ${hostId_mongoId}
         `('returns $expectedMessage when $value is sent as userId', async ({ value, expectedMessage }) => {
-            const response = await AdminTestFunctions.approveUser(value);
+            const response = await AdminTestFunctions.approveUser(value, accessToken, refreshToken);
 
             const body = response.body;
 
@@ -308,7 +303,7 @@ describe("Admin Operations", () => {
 
     describe("Set Host Suspension Status", () => {
         afterEach(async () => {
-            await TestFunctions.deleteUser("jiggybaby@gmail.com");
+            await UserTestFunctions.deleteUser("kutupa123@protonmail.com");
         });
 
         const hostObject = UserTestFunctions.getHostObject();
@@ -320,8 +315,8 @@ describe("Admin Operations", () => {
         test("response status code is 200 if host suspension status is successfully set", async () => {
             const user = await AuthTestFunctions.registerUser(hostObject);
 
-            const response = await AdminTestFunctions.setUserSuspensionStatus(
-                user.body.user._id,
+            const response = await AdminTestFunctions.setHostSuspensionStatus(
+                user.body.data.user._id,
                 requestBody,
                 accessToken,
                 refreshToken
@@ -333,8 +328,8 @@ describe("Admin Operations", () => {
         test("response body has a success message if host suspension status is successfully set", async () => {
             const user = await AuthTestFunctions.registerUser(hostObject);
 
-            const response = await AdminTestFunctions.setUserSuspensionStatus(
-                user.body.user._id,
+            const response = await AdminTestFunctions.setHostSuspensionStatus(
+                user.body.data.user._id,
                 requestBody,
                 accessToken,
                 refreshToken
@@ -346,14 +341,16 @@ describe("Admin Operations", () => {
         test("Host suspension status was set to true in the database", async () => {
             const user = await AuthTestFunctions.registerUser(hostObject);
 
-            await AdminTestFunctions.setUserSuspensionStatus(
-                user.body.user._id,
+            await AdminTestFunctions.setHostSuspensionStatus(
+                user.body.data.user._id,
                 requestBody,
                 accessToken,
                 refreshToken
             );
 
-            expect(user.accountSuspended).toBe(true);
+            const response = await UserTestFunctions.getHost(user.body.data.user._id, accessToken, refreshToken);
+
+            expect(response.body.data.host.accountSuspended).toBe(true);
         });
 
         const status_empty = "Host Suspension Status cannot be empty";
@@ -372,9 +369,9 @@ describe("Admin Operations", () => {
             
             requestBody.status = status;
             
-            userId = (userId == "") ? user.body.user._id : userId;
+            userId = (userId == "") ? user.body.data.user._id : userId;
 
-            const response = await AdminTestFunctions.setHostSuspensionStatus(userId, requestBody);
+            const response = await AdminTestFunctions.setHostSuspensionStatus(userId, requestBody, accessToken, refreshToken);
 
             expect(response.body.errors).toContain(expectedMessage);
         });
